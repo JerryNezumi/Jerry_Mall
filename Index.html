@@ -170,6 +170,411 @@
 
         <div id="orderList" class="hidden">
             <h2>我的訂單</h2>
+            <!-- 訂單列表將在這裡顯示 -->
+        </div>
+    </div>
+
+    <script>
+        const productForm = document.getElementById('productForm');
+        const productList = document.getElementById('productList');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const orderBtn = document.getElementById('orderBtn');
+        const authForms = document.getElementById('authForms');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const orderList = document.getElementById('orderList');
+
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const currentPageSpan = document.getElementById('currentPage');
+
+        let currentUser = null;
+        let currentOffset = 0;
+        const limit = 5; // 每頁顯示的商品數量
+
+        // 顯示登入表單
+        loginBtn.addEventListener('click', () => {
+            console.log('登入按鈕被點擊');
+            authForms.classList.remove('hidden');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        });
+
+        // 顯示註冊表單
+        registerBtn.addEventListener('click', () => {
+            console.log('註冊按鈕被點擊');
+            authForms.classList.remove('hidden');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        });
+
+        // 註冊
+        registerForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const email = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            const userRegisterRequest = {
+                email: email,
+                password: password
+            };
+
+            fetch('http://localhost:8080/User/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userRegisterRequest)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('註冊成功:', data);
+                alert('註冊成功，請登入');
+                loginBtn.click();
+            })
+            .catch(error => {
+                console.error('註冊失敗:', error);
+                alert('註冊失敗: ' + error.message);
+            });
+        });
+
+        // 登入
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const email = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch('http://localhost:8080/User/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('登入失敗');
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentUser = data;
+                localStorage.setItem('userToken', data.userId);
+                updateUIAfterLogin();
+            })
+            .catch(error => {
+                console.error('登入失敗:', error);
+                alert('登入失敗: ' + error.message);
+            });
+        });
+
+        // 登出
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            localStorage.removeItem('userToken');
+            updateUIAfterLogout();
+        });
+
+        // 顯示訂單
+        orderBtn.addEventListener('click', fetchOrders);
+
+        function updateUIAfterLogin() {
+            authForms.classList.add('hidden');
+            loginBtn.classList.add('hidden');
+            registerBtn.classList.add('hidden');
+            logoutBtn.classList.remove('hidden');
+            orderBtn.classList.remove('hidden');
+            fetchProducts();
+        }
+
+        function updateUIAfterLogout() {
+            loginBtn.classList.remove('hidden');
+            registerBtn.classList.remove('hidden');
+            logoutBtn.classList.add('hidden');
+            orderBtn.classList.add('hidden');
+            orderList.classList.add('hidden');
+            // 不再清空商品列表
+            // productList.innerHTML = '';
+        }
+
+        function fetchOrders() {
+            fetch('http://localhost:8080/orders', {
+                headers: { 'Authorization': `Bearer ${currentUser.token}` }
+            })
+            .then(response => response.json())
+            .then(orders => {
+                orderList.innerHTML = '';
+                orders.forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.innerHTML = `
+                        <h3>訂單 ID: ${order.orderId}</h3>
+                        <p>總價: $${order.totalAmount}</p>
+                        <p>創建日期: ${new Date(order.createdDate).toLocaleString()}</p>
+                    `;
+                    orderList.appendChild(orderDiv);
+                });
+                orderList.classList.remove('hidden');
+            })
+            .catch(error => console.error('獲取訂單失敗:', error));
+        }
+
+        // 取得商品列表
+        function fetchProducts(offset = 0) {
+            const url = new URL('http://localhost:8080/products');
+            url.searchParams.append('limit', limit);
+            url.searchParams.append('offset', offset);
+            // 可以根據需要添加其他查詢參數，比如 category, search, orderBy, sort
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    productList.innerHTML = '';
+                    data.results.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'product';
+                        productDiv.innerHTML = `
+                            <img src="${product.imageUrl}" alt="${product.productName}" class="product-image">
+                            <div class="product-details">
+                                <h3>${product.productName}</h3>
+                                <p>類別: ${product.category}</p>
+                                <p>價格: $${product.price}</p>
+                                <p>庫存: ${product.stock}</p>
+                                <p>描述: ${product.description}</p>
+                                <button onclick="editProduct(${product.productId})">編輯</button>
+                                <button onclick="deleteProduct(${product.productId})">刪除</button>
+                                <button onclick="purchaseProduct(${product.productId})">購買</button>
+                            </div>
+                        `;
+                        productList.appendChild(productDiv);
+                    });
+
+                    // 更新分頁信息
+                    currentOffset = offset;
+                    const currentPage = Math.floor(offset / limit) + 1;
+                    const totalPages = Math.ceil(data.total / limit);
+                    currentPageSpan.textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
+                    prevPageBtn.disabled = currentOffset === 0;
+                    nextPageBtn.disabled = currentOffset + limit >= data.total;
+                })
+                .catch(error => console.error('獲取商品列表失敗:', error));
+        }
+
+        // 新增或更新商品
+        productForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            errorMessage.textContent = '';
+
+            const productId = document.getElementById('productId').value;
+            const productData = {
+                productName: document.getElementById('productName').value.trim(),
+                category: document.getElementById('category').value,
+                imageUrl: document.getElementById('imageUrl').value.trim(),
+                price: parseInt(document.getElementById('price').value),
+                stock: parseInt(document.getElementById('stock').value),
+                description: document.getElementById('description').value.trim()
+            };
+
+            if (!productData.productName || !productData.category || !productData.imageUrl) {
+                errorMessage.textContent = '所有必填欄位都必須填寫！';
+                return;
+            }
+
+            const url = productId ? `http://localhost:8080/products/${productId}` : 'http://localhost:8080/products';
+            const method = productId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('網絡錯誤！');
+                }
+                return response.json();
+            })
+            .then(data => {
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理系統</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        form {
+            margin-bottom: 30px;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        input, select, textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .product-list {
+            margin-top: 30px;
+        }
+        .product {
+            display: flex;
+            align-items: start;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            transition: box-shadow 0.3s;
+        }
+        .product-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        .product-details {
+            flex-grow: 1;
+        }
+        .product:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .product button {
+            margin-right: 10px;
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+        .product button:last-child {
+            background-color: #e74c3c;
+        }
+        .product button:last-child:hover {
+            background-color: #c0392b;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .nav button {
+            margin-left: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>商品管理系統</h1>
+        <div class="nav">
+            <div>
+                <button id="loginBtn">登入</button>
+                <button id="registerBtn">註冊</button>
+            </div>
+            <div>
+                <button id="logoutBtn" class="hidden">登出</button>
+                <button id="orderBtn" class="hidden">我的訂單</button>
+            </div>
+        </div>
+
+        <div id="authForms" class="hidden">
+            <form id="loginForm" class="hidden">
+                <h2>登入</h2>
+                <input type="text" id="loginUsername" placeholder="用戶名" required>
+                <input type="password" id="loginPassword" placeholder="密碼" required>
+                <button type="submit">登入</button>
+            </form>
+            <form id="registerForm" class="hidden">
+                <h2>註冊</h2>
+                <input type="text" id="registerUsername" placeholder="用戶名" required>
+                <input type="password" id="registerPassword" placeholder="密碼" required>
+                <button type="submit">註冊</button>
+            </form>
+        </div>
+
+        <form id="productForm">
+            <input type="hidden" id="productId">
+            <input type="text" id="productName" placeholder="商品名稱" required>
+            <select id="category" required>
+                <option value="" disabled selected>選擇類別</option>
+                <option value="ELECTRONICS">電子產品</option>
+                <option value="CLOTHING">服裝</option>
+                <option value="FOOD">食品</option>
+            </select>
+            <input type="text" id="imageUrl" placeholder="圖片網址" required>
+            <input type="number" id="price" placeholder="價格" required>
+            <input type="number" id="stock" placeholder="庫存" required>
+            <textarea id="description" placeholder="描述"></textarea>
+            <button type="submit" id="submitBtn">新增商品</button>
+            <button type="button" id="cancelBtn" style="display:none;">取消</button>
+            <div class="error" id="errorMessage"></div>
+        </form>
+
+        <div class="product-list" id="productList"></div>
+        
+        <div class="pagination">
+            <button id="prevPage">上一頁</button>
+            <span id="currentPage"></span>
+            <button id="nextPage">下一頁</button>
+        </div>
+
+        <div id="orderList" class="hidden">
+            <h2>我的訂單</h2>
             // 訂單列表將在這裡顯示
         </div>
     </div>
