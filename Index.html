@@ -103,6 +103,14 @@
         .hidden {
             display: none;
         }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+        }
     </style>
 </head>
 <body>
@@ -153,6 +161,11 @@
         </form>
 
         <div class="product-list" id="productList"></div>
+        <div class="pagination" id="pagination">
+            <button id="prevPage">上一頁</button>
+            <span id="currentPage"></span>
+            <button id="nextPage">下一頁</button>
+        </div>
 
         <div id="orderList" class="hidden">
             <h2>我的訂單</h2>
@@ -176,7 +189,13 @@
         const registerForm = document.getElementById('registerForm');
         const orderList = document.getElementById('orderList');
 
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const currentPageSpan = document.getElementById('currentPage');
+
         let currentUser = null;
+        let currentPage = 1;
+        const pageSize = 5; // 每頁顯示的商品數量
 
         // 顯示登入表單
         loginBtn.addEventListener('click', () => {
@@ -305,8 +324,8 @@
         }
 
         // 取得商品列表
-        function fetchProducts() {
-            fetch('http://localhost:8080/products')
+        function fetchProducts(page = 1) {
+            fetch(`http://localhost:8080/products?page=${page}&limit=${pageSize}`)
                 .then(response => response.json())
                 .then(data => {
                     productList.innerHTML = '';
@@ -328,6 +347,12 @@
                         `;
                         productList.appendChild(productDiv);
                     });
+
+                    // 更新分頁信息
+                    currentPage = page;
+                    currentPageSpan.textContent = `第 ${currentPage} 頁`;
+                    prevPageBtn.disabled = currentPage === 1;
+                    nextPageBtn.disabled = data.results.length < pageSize;
                 })
                 .catch(error => console.error('獲取商品列表失敗:', error));
         }
@@ -401,113 +426,97 @@
         function deleteProduct(productId) {
             if (confirm('確定要刪除這個商品嗎？')) {
                 fetch(`http://localhost:8080/products/${productId}`, {
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商品管理系統</title>
-    <style>
-        body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            line-height: 1.6;
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('刪除商品失敗');
+                    }
+                    fetchProducts();
+                })
+                .catch(error => {
+                    console.error('刪除商品錯誤:', error);
+                    alert('刪除商品失敗: ' + error.message);
+                });
+            }
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
+
+        // 重置表單
+        function resetForm() {
+            document.getElementById('productId').value = '';
+            document.getElementById('productName').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('stock').value = '';
+            document.getElementById('description').value = '';
+            submitBtn.textContent = '新增商品';
+            cancelBtn.style.display = 'none';
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+
+        // 購買商品
+        function purchaseProduct(productId) {
+            if (currentUser) {
+                const orderData = {
+                    userId: currentUser.userId,
+                    buyItemList: [{
+                        productId: productId,
+                        quantity: 1
+                    }]
+                };
+
+                fetch('http://localhost:8080/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('購買商品失敗');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('購買成功:', data);
+                    alert('購買成功');
+                    fetchOrders(); // 重新獲取訂單列表
+                })
+                .catch(error => {
+                    console.error('購買商品錯誤:', error);
+                    alert('購買商品失敗: ' + error.message);
+                });
+            } else {
+                alert('請先登入');
+            }
         }
-        form {
-            margin-bottom: 30px;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        input, select, textarea {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #bdc3c7;
-            border-radius: 3px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .product-list {
-            margin-top: 30px;
-        }
-        .product {
-            display: flex;
-            align-items: start;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            transition: box-shadow 0.3s;
-        }
-        .product-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 15px;
-            border-radius: 5px;
-        }
-        .product-details {
-            flex-grow: 1;
-        }
-        .product:hover {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .error {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .product button {
-            margin-right: 10px;
-            padding: 5px 10px;
-            font-size: 0.9em;
-        }
-        .product button:last-child {
-            background-color: #e74c3c;
-        }
-        .product button:last-child:hover {
-            background-color: #c0392b;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .nav button {
-            margin-left: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
-</head>
+
+        // 上一頁
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchProducts(currentPage - 1);
+            }
+        });
+
+        // 下一頁
+        nextPageBtn.addEventListener('click', () => {
+            fetchProducts(currentPage + 1);
+        });
+
+        // 頁面加載時的行為
+        window.onload = () => {
+            const userId = localStorage.getItem('userToken');
+            if (userId) {
+                currentUser = { userId: userId };
+                updateUIAfterLogin();
+            } else {
+                fetchProducts(); // 使用默認的第一頁
+            }
+        };
+    </script>
+</body>
+</html>
 <body>
     <div class="container">
         <h1>商品管理系統</h1>
@@ -556,6 +565,11 @@
         </form>
 
         <div class="product-list" id="productList"></div>
+        <div class="pagination" id="pagination">
+            <button id="prevPage">上一頁</button>
+            <span id="currentPage"></span>
+            <button id="nextPage">下一頁</button>
+        </div>
 
         <div id="orderList" class="hidden">
             <h2>我的訂單</h2>
@@ -579,7 +593,13 @@
         const registerForm = document.getElementById('registerForm');
         const orderList = document.getElementById('orderList');
 
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const currentPageSpan = document.getElementById('currentPage');
+
         let currentUser = null;
+        let currentPage = 1;
+        const pageSize = 5; // 每頁顯示的商品數量
 
         // 顯示登入表單
         loginBtn.addEventListener('click', () => {
@@ -600,11 +620,11 @@
         // 註冊
         registerForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
             const userRegisterRequest = {
-                username: username,
+                email: email,
                 password: password
             };
 
@@ -633,13 +653,13 @@
         // 登入
         loginForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            const username = document.getElementById('loginUsername').value;
+            const email = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
             fetch('http://localhost:8080/User/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ email, password })
             })
             .then(response => {
                 if (!response.ok) {
@@ -649,7 +669,7 @@
             })
             .then(data => {
                 currentUser = data;
-                localStorage.setItem('userToken', data.userId); // 假設後端返回的用戶對象中有 userId
+                localStorage.setItem('userToken', data.userId);
                 updateUIAfterLogin();
             })
             .catch(error => {
@@ -688,18 +708,17 @@
         }
 
         function fetchOrders() {
-            fetch('http://localhost:8080/orders', {
-                headers: { 'Authorization': `Bearer ${currentUser.token}` }
-            })
+            const userId = currentUser.userId;
+            fetch(`http://localhost:8080/orders?userId=${userId}`)
             .then(response => response.json())
-            .then(orders => {
+            .then(data => {
                 orderList.innerHTML = '';
-                orders.forEach(order => {
+                data.results.forEach(order => {
                     const orderDiv = document.createElement('div');
                     orderDiv.innerHTML = `
                         <h3>訂單 ID: ${order.orderId}</h3>
-                        <p>總價: $${order.totalPrice}</p>
-                        <p>狀態: ${order.status}</p>
+                        <p>總價: $${order.totalAmount}</p>
+                        <p>創建日期: ${new Date(order.createdDate).toLocaleString()}</p>
                     `;
                     orderList.appendChild(orderDiv);
                 });
@@ -709,8 +728,8 @@
         }
 
         // 取得商品列表
-        function fetchProducts() {
-            fetch('http://localhost:8080/products')
+        function fetchProducts(page = 1) {
+            fetch(`http://localhost:8080/products?page=${page}&limit=${pageSize}`)
                 .then(response => response.json())
                 .then(data => {
                     productList.innerHTML = '';
@@ -732,6 +751,12 @@
                         `;
                         productList.appendChild(productDiv);
                     });
+
+                    // 更新分頁信息
+                    currentPage = page;
+                    currentPageSpan.textContent = `第 ${currentPage} 頁`;
+                    prevPageBtn.disabled = currentPage === 1;
+                    nextPageBtn.disabled = data.results.length < pageSize;
                 })
                 .catch(error => console.error('獲取商品列表失敗:', error));
         }
@@ -804,113 +829,98 @@
         // 刪除商品
         function deleteProduct(productId) {
             if (confirm('確定要刪除這個商品嗎？')) {
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商品管理系統</title>
-    <style>
-        body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            line-height: 1.6;
+                fetch(`http://localhost:8080/products/${productId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('刪除商品失敗');
+                    }
+                    fetchProducts();
+                })
+                .catch(error => {
+                    console.error('刪除商品錯誤:', error);
+                    alert('刪除商品失敗: ' + error.message);
+                });
+            }
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
+
+        // 重置表單
+        function resetForm() {
+            document.getElementById('productId').value = '';
+            document.getElementById('productName').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('stock').value = '';
+            document.getElementById('description').value = '';
+            submitBtn.textContent = '新增商品';
+            cancelBtn.style.display = 'none';
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+
+        // 購買商品
+        function purchaseProduct(productId) {
+            if (currentUser) {
+                const orderData = {
+                    userId: currentUser.userId,
+                    buyItemList: [{
+                        productId: productId,
+                        quantity: 1
+                    }]
+                };
+
+                fetch('http://localhost:8080/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('購買商品失敗');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('購買成功:', data);
+                    alert('購買成功');
+                    fetchOrders(); // 重新獲取訂單列表
+                })
+                .catch(error => {
+                    console.error('購買商品錯誤:', error);
+                    alert('購買商品失敗: ' + error.message);
+                });
+            } else {
+                alert('請先登入');
+            }
         }
-        form {
-            margin-bottom: 30px;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        input, select, textarea {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #bdc3c7;
-            border-radius: 3px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .product-list {
-            margin-top: 30px;
-        }
-        .product {
-            display: flex;
-            align-items: start;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            transition: box-shadow 0.3s;
-        }
-        .product-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 15px;
-            border-radius: 5px;
-        }
-        .product-details {
-            flex-grow: 1;
-        }
-        .product:hover {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .error {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .product button {
-            margin-right: 10px;
-            padding: 5px 10px;
-            font-size: 0.9em;
-        }
-        .product button:last-child {
-            background-color: #e74c3c;
-        }
-        .product button:last-child:hover {
-            background-color: #c0392b;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .nav button {
-            margin-left: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
-</head>
+
+        // 上一頁
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchProducts(currentPage - 1);
+            }
+        });
+
+        // 下一頁
+        nextPageBtn.addEventListener('click', () => {
+            fetchProducts(currentPage + 1);
+        });
+
+        // 頁面加載時的行為
+        window.onload = () => {
+            const userId = localStorage.getItem('userToken');
+            if (userId) {
+                currentUser = { userId: userId };
+                updateUIAfterLogin();
+            } else {
+                fetchProducts(); // 使用默認的第一頁
+            }
+        };
+    </script>
+</body>
+</html>
 <body>
     <div class="container">
         <h1>商品管理系統</h1>
