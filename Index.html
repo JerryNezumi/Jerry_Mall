@@ -192,47 +192,65 @@
             loginForm.classList.add('hidden');
         });
 
-        // 登入
-        loginForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-
-            fetch('http://localhost:8080/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                currentUser = data;
-                updateUIAfterLogin();
-            })
-            .catch(error => console.error('登入失敗:', error));
-        });
-
         // 註冊
         registerForm.addEventListener('submit', (event) => {
             event.preventDefault();
             const username = document.getElementById('registerUsername').value;
             const password = document.getElementById('registerPassword').value;
 
-            fetch('http://localhost:8080/register', {
+            fetch('http://localhost:8080/User/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('註冊失敗');
+                }
+                return response.json();
+            })
             .then(data => {
                 alert('註冊成功，請登入');
                 loginBtn.click();
             })
-            .catch(error => console.error('註冊失敗:', error));
+            .catch(error => {
+                console.error('註冊失敗:', error);
+                alert('註冊失敗: ' + error.message);
+            });
+        });
+
+        // 登入
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch('http://localhost:8080/User/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('登入失敗');
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentUser = data;
+                localStorage.setItem('userToken', data.userId); // 假設後端返回的用戶對象中有 userId
+                updateUIAfterLogin();
+            })
+            .catch(error => {
+                console.error('登入失敗:', error);
+                alert('登入失敗: ' + error.message);
+            });
         });
 
         // 登出
         logoutBtn.addEventListener('click', () => {
             currentUser = null;
+            localStorage.removeItem('userToken');
             updateUIAfterLogout();
         });
 
@@ -421,20 +439,12 @@
 
         // 頁面加載時檢查登入狀態
         window.onload = () => {
-            const token = localStorage.getItem('userToken');
-            if (token) {
-                // 驗證 token
-                fetch('http://localhost:8080/verify-token', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    currentUser = data;
-                    updateUIAfterLogin();
-                })
-                .catch(() => {
-                    localStorage.removeItem('userToken');
-                });
+            const userId = localStorage.getItem('userToken');
+            if (userId) {
+                // 這裡可能需要一個額外的 API 來驗證用戶 ID
+                // 暫時直接設置 currentUser
+                currentUser = { userId: userId };
+                updateUIAfterLogin();
             }
         };
     </script>
