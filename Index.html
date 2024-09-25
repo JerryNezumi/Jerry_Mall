@@ -1,126 +1,118 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品管理</title>
-    <script>
-        const baseUrl = "http://localhost:8080"; // 你的後端 API 部署網址
-
-        // 查詢商品列表
-        async function fetchProducts() {
-            const response = await fetch(`${baseUrl}/products`);
-            const data = await response.json();
-            console.log(data); // 這裡可以將資料顯示到網頁上
-            const productList = document.getElementById("product-list");
-            productList.innerHTML = "";
-            data.results.forEach(product => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `商品名稱: ${product.product_name}, 價格: ${product.price}`;
-                productList.appendChild(listItem);
-            });
+    <style>
+        body {
+            font-family: Arial, sans-serif;
         }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, select, textarea {
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+        }
+        .product-list {
+            margin-top: 20px;
+        }
+        .product {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>商品管理</h1>
+        <form id="productForm">
+            <input type="text" id="productName" placeholder="商品名稱" required>
+            <select id="category" required>
+                <option value="" disabled selected>選擇類別</option>
+                <option value="ELECTRONICS">電子產品</option>
+                <option value="CLOTHING">服裝</option>
+                <option value="FOOD">食品</option>
+            </select>
+            <input type="text" id="imageUrl" placeholder="圖片網址" required>
+            <input type="number" id="price" placeholder="價格" required>
+            <input type="number" id="stock" placeholder="庫存" required>
+            <textarea id="description" placeholder="描述"></textarea>
+            <button type="submit">新增商品</button>
+        </form>
 
-        // 查詢單一商品
-        async function fetchProductById(productId) {
-            const response = await fetch(`${baseUrl}/products/${productId}`);
-            const data = await response.json();
-            console.log(data); // 顯示商品資訊
-            document.getElementById("product-detail").textContent = JSON.stringify(data);
+        <div class="product-list" id="productList"></div>
+    </div>
+
+    <script>
+        const productForm = document.getElementById('productForm');
+        const productList = document.getElementById('productList');
+
+        // 取得商品列表
+        function fetchProducts() {
+            fetch('http://localhost:8080/products')
+                .then(response => response.json())
+                .then(data => {
+                    productList.innerHTML = '';
+                    data.results.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'product';
+                        productDiv.innerHTML = `
+                            <h3>${product.productName}</h3>
+                            <p>類別: ${product.category}</p>
+                            <p>價格: $${product.price}</p>
+                            <p>庫存: ${product.stock}</p>
+                            <p>描述: ${product.description}</p>
+                        `;
+                        productList.appendChild(productDiv);
+                    });
+                })
+                .catch(error => console.error('Error fetching products:', error));
         }
 
         // 新增商品
-        async function createProduct() {
+        productForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
             const productData = {
-                product_name: document.getElementById("product-name").value,
-                price: document.getElementById("product-price").value,
-                stock: document.getElementById("product-stock").value
+                productName: document.getElementById('productName').value,
+                category: document.getElementById('category').value,
+                imageUrl: document.getElementById('imageUrl').value,
+                price: parseInt(document.getElementById('price').value),
+                stock: parseInt(document.getElementById('stock').value),
+                description: document.getElementById('description').value
             };
 
-            const response = await fetch(`${baseUrl}/products`, {
+            fetch('http://localhost:8080/products', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(productData)
-            });
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Product created:', data);
+                fetchProducts(); // 重新載入商品列表
+                productForm.reset(); // 清空表單
+            })
+            .catch(error => console.error('Error creating product:', error));
+        });
 
-            if (response.status === 201) {
-                const newProduct = await response.json();
-                console.log("新增成功:", newProduct);
-                fetchProducts(); // 更新商品列表
-            } else {
-                console.error("新增失敗");
-            }
-        }
-
-        // 更新商品
-        async function updateProduct(productId) {
-            const productData = {
-                product_name: document.getElementById("update-product-name").value,
-                price: document.getElementById("update-product-price").value,
-                stock: document.getElementById("update-product-stock").value
-            };
-
-            const response = await fetch(`${baseUrl}/products/${productId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(productData)
-            });
-
-            if (response.status === 200) {
-                const updatedProduct = await response.json();
-                console.log("更新成功:", updatedProduct);
-                fetchProducts(); // 更新商品列表
-            } else {
-                console.error("更新失敗");
-            }
-        }
-
-        // 刪除商品
-        async function deleteProduct(productId) {
-            const response = await fetch(`${baseUrl}/products/${productId}`, {
-                method: 'DELETE'
-            });
-
-            if (response.status === 204) {
-                console.log("刪除成功");
-                fetchProducts(); // 更新商品列表
-            } else {
-                console.error("刪除失敗");
-            }
-        }
+        // 頁面加載時取得商品
+        window.onload = fetchProducts;
     </script>
-</head>
-<body>
-    <h1>商品管理系統</h1>
-
-    <h2>商品列表</h2>
-    <button onclick="fetchProducts()">查詢商品列表</button>
-    <ul id="product-list"></ul>
-
-    <h2>查詢單一商品</h2>
-    <input type="number" id="product-id" placeholder="輸入商品 ID">
-    <button onclick="fetchProductById(document.getElementById('product-id').value)">查詢商品</button>
-    <div id="product-detail"></div>
-
-    <h2>新增商品</h2>
-    <input type="text" id="product-name" placeholder="商品名稱">
-    <input type="number" id="product-price" placeholder="商品價格">
-    <input type="number" id="product-stock" placeholder="庫存">
-    <button onclick="createProduct()">新增商品</button>
-
-    <h2>更新商品</h2>
-    <input type="number" id="update-product-id" placeholder="商品 ID">
-    <input type="text" id="update-product-name" placeholder="商品名稱">
-    <input type="number" id="update-product-price" placeholder="商品價格">
-    <input type="number" id="update-product-stock" placeholder="庫存">
-    <button onclick="updateProduct(document.getElementById('update-product-id').value)">更新商品</button>
-
-    <h2>刪除商品</h2>
-    <input type="number" id="delete-product-id" placeholder="商品 ID">
-    <button onclick="deleteProduct(document.getElementById('delete-product-id').value)">刪除商品</button>
 </body>
 </html>
