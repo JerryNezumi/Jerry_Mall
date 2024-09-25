@@ -6,518 +6,351 @@
     <title>商品管理系統</title>
     <style>
         body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: Arial, sans-serif;
             line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 1000px;
+            margin: auto;
+            background: white;
             padding: 20px;
-            background-color: #fff;
+            border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+        h1, h2 {
+            color: #333;
         }
-        form {
-            margin-bottom: 30px;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        input, select, textarea {
+        input[type="text"], input[type="password"], input[type="number"], select, textarea {
             width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #bdc3c7;
-            border-radius: 3px;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         button {
+            background-color: #4CAF50;
+            color: white;
             padding: 10px 15px;
-            background-color: #3498db;
-            color: #fff;
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #2980b9;
-        }
-        .product-list {
-            margin-top: 30px;
+            background-color: #45a049;
         }
         .product {
-            display: flex;
-            align-items: start;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            transition: box-shadow 0.3s;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
         }
-        .product-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 15px;
-            border-radius: 5px;
-        }
-        .product-details {
-            flex-grow: 1;
-        }
-        .product:hover {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .error {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .product button {
+        .product img {
+            max-width: 100px;
+            max-height: 100px;
             margin-right: 10px;
-            padding: 5px 10px;
-            font-size: 0.9em;
-        }
-        .product button:last-child {
-            background-color: #e74c3c;
-        }
-        .product button:last-child:hover {
-            background-color: #c0392b;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .nav button {
-            margin-left: 10px;
         }
         .hidden {
             display: none;
         }
         .pagination {
-            display: flex;
-            justify-content: center;
             margin-top: 20px;
         }
         .pagination button {
-            margin: 0 5px;
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>商品管理系統</h1>
-        <div class="nav">
-            <div>
-                <button id="loginBtn">登入</button>
-                <button id="registerBtn">註冊</button>
-            </div>
-            <div>
-                <button id="logoutBtn" class="hidden">登出</button>
-                <button id="orderBtn" class="hidden">我的訂單</button>
-            </div>
-        </div>
-
-        <div id="authForms" class="hidden">
-            <form id="loginForm" class="hidden">
-                <h2>登入</h2>
-                <input type="text" id="loginUsername" placeholder="用戶名" required>
+        
+        <!-- 登入/註冊表單 -->
+        <div id="authForms">
+            <h2>登入</h2>
+            <form id="loginForm">
+                <input type="text" id="loginEmail" placeholder="電子郵件" required>
                 <input type="password" id="loginPassword" placeholder="密碼" required>
                 <button type="submit">登入</button>
             </form>
-            <form id="registerForm" class="hidden">
-                <h2>註冊</h2>
-                <input type="text" id="registerUsername" placeholder="用戶名" required>
+            
+            <h2>註冊</h2>
+            <form id="registerForm">
+                <input type="text" id="registerEmail" placeholder="電子郵件" required>
                 <input type="password" id="registerPassword" placeholder="密碼" required>
                 <button type="submit">註冊</button>
             </form>
         </div>
 
+        <button id="logoutBtn" class="hidden">登出</button>
+
+        <!-- 商品表單 -->
+        <h2>新增/編輯商品</h2>
         <form id="productForm">
             <input type="hidden" id="productId">
             <input type="text" id="productName" placeholder="商品名稱" required>
-            <select id="category" required>
-                <option value="" disabled selected>選擇類別</option>
-                <option value="ELECTRONICS">電子產品</option>
-                <option value="CLOTHING">服裝</option>
-                <option value="FOOD">食品</option>
-            </select>
-            <input type="text" id="imageUrl" placeholder="圖片網址" required>
+            <input type="text" id="category" placeholder="類別" required>
+            <input type="text" id="imageUrl" placeholder="圖片URL" required>
             <input type="number" id="price" placeholder="價格" required>
             <input type="number" id="stock" placeholder="庫存" required>
             <textarea id="description" placeholder="描述"></textarea>
-            <button type="submit" id="submitBtn">新增商品</button>
-            <button type="button" id="cancelBtn" style="display:none;">取消</button>
-            <div class="error" id="errorMessage"></div>
+            <button type="submit">保存商品</button>
         </form>
 
-        <div class="product-list" id="productList"></div>
-        
+        <!-- 商品列表 -->
+        <h2>商品列表</h2>
+        <div id="productList"></div>
+
+        <!-- 分頁控制 -->
         <div class="pagination">
             <button id="prevPage">上一頁</button>
             <span id="currentPage"></span>
             <button id="nextPage">下一頁</button>
         </div>
 
-        <div id="orderList" class="hidden">
-            <h2>我的訂單</h2>
-            <!-- 訂單列表將在這裡顯示 -->
-        </div>
+        <!-- 訂單列表 -->
+        <h2>我的訂單</h2>
+        <div id="orderList"></div>
     </div>
 
     <script>
-        const productForm = document.getElementById('productForm');
-        const productList = document.getElementById('productList');
-        const errorMessage = document.getElementById('errorMessage');
-        const submitBtn = document.getElementById('submitBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
+        const API_URL = 'http://localhost:8080';
+        let currentUser = null;
+        let currentPage = 1;
+        const pageSize = 10;
 
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const orderBtn = document.getElementById('orderBtn');
+        // 元素引用
         const authForms = document.getElementById('authForms');
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
-        const orderList = document.getElementById('orderList');
-
+        const logoutBtn = document.getElementById('logoutBtn');
+        const productForm = document.getElementById('productForm');
+        const productList = document.getElementById('productList');
         const prevPageBtn = document.getElementById('prevPage');
         const nextPageBtn = document.getElementById('nextPage');
         const currentPageSpan = document.getElementById('currentPage');
-
-        let currentUser = null;
-        let currentOffset = 0;
-        const limit = 5; // 每頁顯示的商品數量
-
-        // 顯示登入表單
-        loginBtn.addEventListener('click', () => {
-            console.log('登入按鈕被點擊');
-            authForms.classList.remove('hidden');
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-        });
-
-        // 顯示註冊表單
-        registerBtn.addEventListener('click', () => {
-            console.log('註冊按鈕被點擊');
-            authForms.classList.remove('hidden');
-            registerForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
-        });
+        const orderList = document.getElementById('orderList');
 
         // 註冊
-        registerForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const email = document.getElementById('registerUsername').value;
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
-
-            const userRegisterRequest = {
-                email: email,
-                password: password
-            };
-
-            fetch('http://localhost:8080/User/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userRegisterRequest)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('註冊成功:', data);
+            try {
+                const response = await fetch(`${API_URL}/User/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!response.ok) throw new Error('註冊失敗');
                 alert('註冊成功，請登入');
-                loginBtn.click();
-            })
-            .catch(error => {
-                console.error('註冊失敗:', error);
-                alert('註冊失敗: ' + error.message);
-            });
+            } catch (error) {
+                alert(error.message);
+            }
         });
 
         // 登入
-        loginForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const email = document.getElementById('loginUsername').value;
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-
-            fetch('http://localhost:8080/User/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('登入失敗');
-                }
-                return response.json();
-            })
-            .then(data => {
-                currentUser = data;
-                localStorage.setItem('userToken', data.userId);
+            try {
+                const response = await fetch(`${API_URL}/User/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!response.ok) throw new Error('登入失敗');
+                const user = await response.json();
+                currentUser = user;
                 updateUIAfterLogin();
-            })
-            .catch(error => {
-                console.error('登入失敗:', error);
-                alert('登入失敗: ' + error.message);
-            });
+            } catch (error) {
+                alert(error.message);
+            }
         });
 
         // 登出
         logoutBtn.addEventListener('click', () => {
             currentUser = null;
-            localStorage.removeItem('userToken');
             updateUIAfterLogout();
         });
 
-        // 顯示訂單
-        orderBtn.addEventListener('click', fetchOrders);
-
+        // 更新UI（登入後）
         function updateUIAfterLogin() {
             authForms.classList.add('hidden');
-            loginBtn.classList.add('hidden');
-            registerBtn.classList.add('hidden');
             logoutBtn.classList.remove('hidden');
-            orderBtn.classList.remove('hidden');
             fetchProducts();
+            fetchOrders();
         }
 
+        // 更新UI（登出後）
         function updateUIAfterLogout() {
-            loginBtn.classList.remove('hidden');
-            registerBtn.classList.remove('hidden');
+            authForms.classList.remove('hidden');
             logoutBtn.classList.add('hidden');
-            orderBtn.classList.add('hidden');
-            orderList.classList.add('hidden');
-            // 不再清空商品列表
-            // productList.innerHTML = '';
+            productList.innerHTML = '';
+            orderList.innerHTML = '';
         }
 
-        function fetchOrders() {
-            fetch('http://localhost:8080/orders', {
-                headers: { 'Authorization': `Bearer ${currentUser.token}` }
-            })
-            .then(response => response.json())
-            .then(orders => {
-                orderList.innerHTML = '';
-                orders.forEach(order => {
-                    const orderDiv = document.createElement('div');
-                    orderDiv.innerHTML = `
-                        <h3>訂單 ID: ${order.orderId}</h3>
-                        <p>總價: $${order.totalAmount}</p>
-                        <p>創建日期: ${new Date(order.createdDate).toLocaleString()}</p>
-                    `;
-                    orderList.appendChild(orderDiv);
-                });
-                orderList.classList.remove('hidden');
-            })
-            .catch(error => console.error('獲取訂單失敗:', error));
+        // 獲取商品列表
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products?limit=${pageSize}&offset=${(currentPage - 1) * pageSize}`);
+                const data = await response.json();
+                displayProducts(data.results);
+                updatePagination(data.total);
+            } catch (error) {
+                console.error('獲取商品失敗:', error);
+            }
         }
 
-        // 取得商品列表
-        function fetchProducts(offset = 0) {
-            const url = new URL('http://localhost:8080/products');
-            url.searchParams.append('limit', limit);
-            url.searchParams.append('offset', offset);
-            // 可以根據需要添加其他查詢參數，比如 category, search, orderBy, sort
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    productList.innerHTML = '';
-                    data.results.forEach(product => {
-                        const productDiv = document.createElement('div');
-                        productDiv.className = 'product';
-                        productDiv.innerHTML = `
-                            <img src="${product.imageUrl}" alt="${product.productName}" class="product-image">
-                            <div class="product-details">
-                                <h3>${product.productName}</h3>
-                                <p>類別: ${product.category}</p>
-                                <p>價格: $${product.price}</p>
-                                <p>庫存: ${product.stock}</p>
-                                <p>描述: ${product.description}</p>
-                                <button onclick="editProduct(${product.productId})">編輯</button>
-                                <button onclick="deleteProduct(${product.productId})">刪除</button>
-                                <button onclick="purchaseProduct(${product.productId})">購買</button>
-                            </div>
-                        `;
-                        productList.appendChild(productDiv);
-                    });
-
-                    // 更新分頁信息
-                    currentOffset = offset;
-                    const currentPage = Math.floor(offset / limit) + 1;
-                    const totalPages = Math.ceil(data.total / limit);
-                    currentPageSpan.textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
-                    prevPageBtn.disabled = currentOffset === 0;
-                    nextPageBtn.disabled = currentOffset + limit >= data.total;
-                })
-                .catch(error => console.error('獲取商品列表失敗:', error));
+        // 顯示商品
+        function displayProducts(products) {
+            productList.innerHTML = products.map(product => `
+                <div class="product">
+                    <img src="${product.imageUrl}" alt="${product.productName}">
+                    <h3>${product.productName}</h3>
+                    <p>價格: $${product.price}</p>
+                    <p>庫存: ${product.stock}</p>
+                    <button onclick="editProduct(${product.productId})">編輯</button>
+                    <button onclick="deleteProduct(${product.productId})">刪除</button>
+                    <button onclick="purchaseProduct(${product.productId})">購買</button>
+                </div>
+            `).join('');
         }
 
-        // 新增或更新商品
-        productForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            errorMessage.textContent = '';
+        // 更新分頁
+        function updatePagination(total) {
+            const totalPages = Math.ceil(total / pageSize);
+            currentPageSpan.textContent = `第 ${currentPage} 頁，共 ${totalPages} 頁`;
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages;
+        }
 
+        // 上一頁
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchProducts();
+            }
+        });
+
+        // 下一頁
+        nextPageBtn.addEventListener('click', () => {
+            currentPage++;
+            fetchProducts();
+        });
+
+        // 新增/編輯商品
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
             const productId = document.getElementById('productId').value;
             const productData = {
-                productName: document.getElementById('productName').value.trim(),
+                productName: document.getElementById('productName').value,
                 category: document.getElementById('category').value,
-                imageUrl: document.getElementById('imageUrl').value.trim(),
-                price: parseInt(document.getElementById('price').value),
+                imageUrl: document.getElementById('imageUrl').value,
+                price: parseFloat(document.getElementById('price').value),
                 stock: parseInt(document.getElementById('stock').value),
-                description: document.getElementById('description').value.trim()
+                description: document.getElementById('description').value
             };
 
-            if (!productData.productName || !productData.category || !productData.imageUrl) {
-                errorMessage.textContent = '所有必填欄位都必須填寫！';
+            try {
+                const url = productId ? `${API_URL}/products/${productId}` : `${API_URL}/products`;
+                const method = productId ? 'PUT' : 'POST';
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+                if (!response.ok) throw new Error('保存商品失敗');
+                alert('商品保存成功');
+                productForm.reset();
+                fetchProducts();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        // 編輯商品
+        async function editProduct(productId) {
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}`);
+                const product = await response.json();
+                document.getElementById('productId').value = product.productId;
+                document.getElementById('productName').value = product.productName;
+                document.getElementById('category').value = product.category;
+                document.getElementById('imageUrl').value = product.imageUrl;
+                document.getElementById('price').value = product.price;
+                document.getElementById('stock').value = product.stock;
+                document.getElementById('description').value = product.description;
+            } catch (error) {
+                console.error('獲取商品詳情失敗:', error);
+            }
+        }
+
+        // 刪除商品
+        async function deleteProduct(productId) {
+            if (confirm('確定要刪除這個商品嗎？')) {
+                try {
+                    const response = await fetch(`${API_URL}/products/${productId}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('刪除商品失敗');
+                    alert('商品已刪除');
+                    fetchProducts();
+                } catch (error) {
+                    alert(error.message);
+                }
+            }
+        }
+
+        // 購買商品
+        async function purchaseProduct(productId) {
+            if (!currentUser) {
+                alert('請先登入');
                 return;
             }
+            try {
+                const response = await fetch(`${API_URL}/order/${currentUser.userId}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, quantity: 1 })
+                });
+                if (!response.ok) throw new Error('購買失敗');
+                alert('購買成功');
+                fetchOrders();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
 
-            const url = productId ? `http://localhost:8080/products/${productId}` : 'http://localhost:8080/products';
-            const method = productId ? 'PUT' : 'POST';
+        // 獲取訂單
+        async function fetchOrders() {
+            if (!currentUser) return;
+            try {
+                const response = await fetch(`${API_URL}/user/${currentUser.userId}/orders`);
+                const orders = await response.json();
+                displayOrders(orders);
+            } catch (error) {
+                console.error('獲取訂單失敗:', error);
+            }
+        }
 
-            fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(productData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('網絡錯誤！');
-                }
-                return response.json();
-            })
-            .then(data => {
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商品管理系統</title>
-    <style>
-        body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            line-height: 1.6;
+        // 顯示訂單
+        function displayOrders(orders) {
+            orderList.innerHTML = orders.map(order => `
+                <div>
+                    <h3>訂單 ID: ${order.orderId}</h3>
+                    <p>總金額: $${order.totalAmount}</p>
+                    <p>訂單日期: ${new Date(order.createdDate).toLocaleString()}</p>
+                </div>
+            `).join('');
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        form {
-            margin-bottom: 30px;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        input, select, textarea {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #bdc3c7;
-            border-radius: 3px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .product-list {
-            margin-top: 30px;
-        }
-        .product {
-            display: flex;
-            align-items: start;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            transition: box-shadow 0.3s;
-        }
-        .product-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 15px;
-            border-radius: 5px;
-        }
-        .product-details {
-            flex-grow: 1;
-        }
-        .product:hover {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .error {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .product button {
-            margin-right: 10px;
-            padding: 5px 10px;
-            font-size: 0.9em;
-        }
-        .product button:last-child {
-            background-color: #e74c3c;
-        }
-        .product button:last-child:hover {
-            background-color: #c0392b;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .nav button {
-            margin-left: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .pagination button {
-            margin: 0 5px;
-        }
-    </style>
-</head>
+
+        // 初始化
+        fetchProducts();
+    </script>
+</body>
+</html>
 <body>
     <div class="container">
         <h1>商品管理系統</h1>
@@ -1194,121 +1027,90 @@
                 method: method,
                 headers: {
                     'Content-Type': 'application/json'
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商品管理系統</title>
-    <style>
-        body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            line-height: 1.6;
+                },
+                body: JSON.stringify(productData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('網絡錯誤！');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('操作成功:', data);
+                alert('操作成功');
+                productForm.reset();
+                fetchProducts();
+            })
+            .catch(error => {
+                console.error('操作失敗:', error);
+                alert('操作失敗: ' + error.message);
+            });
+        });
+
+        // 編輯商品
+        function editProduct(productId) {
+            fetch(`http://localhost:8080/products/${productId}`)
+                .then(response => response.json())
+                .then(product => {
+                    document.getElementById('productId').value = product.productId;
+                    document.getElementById('productName').value = product.productName;
+                    document.getElementById('category').value = product.category;
+                    document.getElementById('imageUrl').value = product.imageUrl;
+                    document.getElementById('price').value = product.price;
+                    document.getElementById('stock').value = product.stock;
+                    document.getElementById('description').value = product.description;
+                })
+                .catch(error => console.error('獲取商品詳情失敗:', error));
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
+
+        // 刪除商品
+        function deleteProduct(productId) {
+            if (confirm('確定要刪除這個商品嗎？')) {
+                fetch(`http://localhost:8080/products/${productId}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('刪除商品失敗');
+                        }
+                        alert('商品已刪除');
+                        fetchProducts();
+                    })
+                    .catch(error => {
+                        console.error('刪除商品失敗:', error);
+                        alert('刪除商品失敗: ' + error.message);
+                    });
+            }
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+
+        // 購買商品
+        function purchaseProduct(productId) {
+            if (!currentUser) {
+                alert('請先登入');
+                return;
+            }
+            fetch(`http://localhost:8080/order/${currentUser.userId}/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, quantity: 1 })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('購買失敗');
+                }
+                alert('購買成功');
+                fetchOrders();
+            })
+            .catch(error => {
+                console.error('購買失敗:', error);
+                alert('購買失敗: ' + error.message);
+            });
         }
-        form {
-            margin-bottom: 30px;
-            background-color: #ecf0f1;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        input, select, textarea {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #bdc3c7;
-            border-radius: 3px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .product-list {
-            margin-top: 30px;
-        }
-        .product {
-            display: flex;
-            align-items: start;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            transition: box-shadow 0.3s;
-        }
-        .product-image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 15px;
-            border-radius: 5px;
-        }
-        .product-details {
-            flex-grow: 1;
-        }
-        .product:hover {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .error {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .product button {
-            margin-right: 10px;
-            padding: 5px 10px;
-            font-size: 0.9em;
-        }
-        .product button:last-child {
-            background-color: #e74c3c;
-        }
-        .product button:last-child:hover {
-            background-color: #c0392b;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .nav button {
-            margin-left: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .pagination button {
-            margin: 0 5px;
-        }
-    </style>
-</head>
+
+        // 初始化
+        fetchProducts();
+    </script>
+</body>
+</html>
 <body>
     <div class="container">
         <h1>商品管理系統</h1>
