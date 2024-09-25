@@ -33,6 +33,10 @@
             padding: 10px;
             margin-bottom: 10px;
         }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -51,6 +55,7 @@
             <input type="number" id="stock" placeholder="庫存" required>
             <textarea id="description" placeholder="描述"></textarea>
             <button type="submit">新增商品</button>
+            <div class="error" id="errorMessage"></div>
         </form>
 
         <div class="product-list" id="productList"></div>
@@ -59,6 +64,7 @@
     <script>
         const productForm = document.getElementById('productForm');
         const productList = document.getElementById('productList');
+        const errorMessage = document.getElementById('errorMessage');
 
         // 取得商品列表
         function fetchProducts() {
@@ -85,15 +91,22 @@
         // 新增商品
         productForm.addEventListener('submit', (event) => {
             event.preventDefault();
+            errorMessage.textContent = ''; // 清空錯誤信息
 
             const productData = {
-                productName: document.getElementById('productName').value,
+                productName: document.getElementById('productName').value.trim(),
                 category: document.getElementById('category').value,
-                imageUrl: document.getElementById('imageUrl').value,
+                imageUrl: document.getElementById('imageUrl').value.trim(),
                 price: parseInt(document.getElementById('price').value),
                 stock: parseInt(document.getElementById('stock').value),
-                description: document.getElementById('description').value
+                description: document.getElementById('description').value.trim()
             };
+
+            // 確保所有必填字段都已填寫
+            if (!productData.productName || !productData.category || !productData.imageUrl) {
+                errorMessage.textContent = '所有必填欄位都必須填寫！';
+                return;
+            }
 
             fetch('http://localhost:8080/products', {
                 method: 'POST',
@@ -102,13 +115,21 @@
                 },
                 body: JSON.stringify(productData)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('網絡錯誤！');
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log('Product created:', data);
                 fetchProducts(); // 重新載入商品列表
                 productForm.reset(); // 清空表單
             })
-            .catch(error => console.error('Error creating product:', error));
+            .catch(error => {
+                errorMessage.textContent = '新增商品失敗：' + error.message;
+                console.error('Error creating product:', error);
+            });
         });
 
         // 頁面加載時取得商品
