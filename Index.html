@@ -37,12 +37,16 @@
             color: red;
             margin-top: 10px;
         }
+        .product button {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>商品管理</h1>
         <form id="productForm">
+            <input type="hidden" id="productId">
             <input type="text" id="productName" placeholder="商品名稱" required>
             <select id="category" required>
                 <option value="" disabled selected>選擇類別</option>
@@ -54,7 +58,8 @@
             <input type="number" id="price" placeholder="價格" required>
             <input type="number" id="stock" placeholder="庫存" required>
             <textarea id="description" placeholder="描述"></textarea>
-            <button type="submit">新增商品</button>
+            <button type="submit" id="submitBtn">新增商品</button>
+            <button type="button" id="cancelBtn" style="display:none;">取消</button>
             <div class="error" id="errorMessage"></div>
         </form>
 
@@ -65,6 +70,8 @@
         const productForm = document.getElementById('productForm');
         const productList = document.getElementById('productList');
         const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
 
         // 取得商品列表
         function fetchProducts() {
@@ -81,18 +88,21 @@
                             <p>價格: $${product.price}</p>
                             <p>庫存: ${product.stock}</p>
                             <p>描述: ${product.description}</p>
+                            <button onclick="editProduct(${product.productId})">編輯</button>
+                            <button onclick="deleteProduct(${product.productId})">刪除</button>
                         `;
                         productList.appendChild(productDiv);
                     });
                 })
-                .catch(error => console.error('Error fetching products:', error));
+                .catch(error => console.error('獲取商品列表失敗:', error));
         }
 
-        // 新增商品
+        // 新增或更新商品
         productForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            errorMessage.textContent = ''; // 清空錯誤信息
+            errorMessage.textContent = '';
 
+            const productId = document.getElementById('productId').value;
             const productData = {
                 productName: document.getElementById('productName').value.trim(),
                 category: document.getElementById('category').value,
@@ -102,14 +112,16 @@
                 description: document.getElementById('description').value.trim()
             };
 
-            // 確保所有必填字段都已填寫
             if (!productData.productName || !productData.category || !productData.imageUrl) {
                 errorMessage.textContent = '所有必填欄位都必須填寫！';
                 return;
             }
 
-            fetch('http://localhost:8080/products', {
-                method: 'POST',
+            const url = productId ? `http://localhost:8080/products/${productId}` : 'http://localhost:8080/products';
+            const method = productId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -122,15 +134,60 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Product created:', data);
-                fetchProducts(); // 重新載入商品列表
-                productForm.reset(); // 清空表單
+                console.log('商品保存成功:', data);
+                fetchProducts();
+                resetForm();
             })
             .catch(error => {
-                errorMessage.textContent = '新增商品失敗：' + error.message;
-                console.error('Error creating product:', error);
+                errorMessage.textContent = '保存商品失敗：' + error.message;
+                console.error('保存商品錯誤:', error);
             });
         });
+
+        // 編輯商品
+        function editProduct(productId) {
+            fetch(`http://localhost:8080/products/${productId}`)
+                .then(response => response.json())
+                .then(product => {
+                    document.getElementById('productId').value = product.productId;
+                    document.getElementById('productName').value = product.productName;
+                    document.getElementById('category').value = product.category;
+                    document.getElementById('imageUrl').value = product.imageUrl;
+                    document.getElementById('price').value = product.price;
+                    document.getElementById('stock').value = product.stock;
+                    document.getElementById('description').value = product.description;
+                    submitBtn.textContent = '更新商品';
+                    cancelBtn.style.display = 'inline-block';
+                })
+                .catch(error => console.error('獲取商品詳情失敗:', error));
+        }
+
+        // 刪除商品
+        function deleteProduct(productId) {
+            if (confirm('確定要刪除這個商品嗎？')) {
+                fetch(`http://localhost:8080/products/${productId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('網絡錯誤！');
+                    }
+                    fetchProducts();
+                })
+                .catch(error => console.error('刪除商品失敗:', error));
+            }
+        }
+
+        // 重置表單
+        function resetForm() {
+            productForm.reset();
+            document.getElementById('productId').value = '';
+            submitBtn.textContent = '新增商品';
+            cancelBtn.style.display = 'none';
+        }
+
+        // 取消編輯
+        cancelBtn.addEventListener('click', resetForm);
 
         // 頁面加載時取得商品
         window.onload = fetchProducts;
