@@ -362,15 +362,20 @@
 
         // 新增獲取用戶訂單的函數
         function fetchUserOrders(userId) {
-            fetch(`http://localhost:8080/user/${userId}/orders`)
-                .then(response => response.json())
+            fetch(`http://localhost:8080/user/${userId}/orders?limit=10&offset=0`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('獲取訂單失敗');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     const orderList = document.getElementById('orderList');
                     orderList.innerHTML = '<h2>我的訂單</h2>';
-                    if (data.length === 0) {
+                    if (data.results.length === 0) {
                         orderList.innerHTML += '<p>您還沒有任何訂單</p>';
                     } else {
-                        data.forEach(order => {
+                        data.results.forEach(order => {
                             const orderDiv = document.createElement('div');
                             orderDiv.className = 'order';
                             orderDiv.innerHTML = `
@@ -382,7 +387,10 @@
                         });
                     }
                 })
-                .catch(error => console.error('Error fetching orders:', error));
+                .catch(error => {
+                    console.error('Error fetching orders:', error);
+                    alert('獲取訂單失敗: ' + error.message);
+                });
         }
 
         // 頁面加載時取得商品
