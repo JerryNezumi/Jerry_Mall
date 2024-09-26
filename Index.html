@@ -103,7 +103,7 @@
 
         <form id="loginForm">
             <h2>登入</h2>
-            <input type="text" id="loginUsername" placeholder="用戶名" required>
+            <input type="email" id="loginEmail" placeholder="電子郵件" required>
             <input type="password" id="loginPassword" placeholder="密碼" required>
             <button type="submit">登入</button>
             <div class="success" id="loginSuccess"></div>
@@ -167,7 +167,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
+                    return response.json().then(err => { throw err; });
                 }
                 return response.json();
             })
@@ -176,7 +176,11 @@
                 document.getElementById('registerError').textContent = '';
             })
             .catch(error => {
-                document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
+                if (error.message === 'EMAIL_ALREADY_EXISTS') {
+                    document.getElementById('registerError').textContent = '該帳號已被註冊';
+                } else {
+                    document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
+                }
                 document.getElementById('registerSuccess').textContent = '';
             });
         });
@@ -184,7 +188,7 @@
         // 登入功能
         document.getElementById('loginForm').addEventListener('submit', (event) => {
             event.preventDefault();
-            const username = document.getElementById('loginUsername').value.trim();
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
             fetch('http://localhost:8080/User/login', {
@@ -192,10 +196,12 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ email, password })
             })
             .then(response => {
-                if (!response.ok) throw new Error('登入失敗');
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
                 return response.json();
             })
             .then(data => {
@@ -204,7 +210,7 @@
                 fetchProducts(); // 登入成功後載入商品
             })
             .catch(error => {
-                document.getElementById('loginError').textContent = error.message;
+                document.getElementById('loginError').textContent = '登入失敗: ' + error.message;
                 document.getElementById('loginSuccess').textContent = '';
             });
         });
