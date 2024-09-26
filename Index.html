@@ -203,7 +203,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
+                    throw new Error('登入失敗');
                 }
                 return response.json();
             })
@@ -213,7 +213,8 @@
                 fetchProducts(); // 登入成功後載入商品
             })
             .catch(error => {
-                document.getElementById('loginError').textContent = '登入失敗: ' + error.message;
+                console.error('Login error:', error); // 添加這行來記錄完整的錯誤對象
+                document.getElementById('loginError').textContent = '登入失敗：帳號或密碼錯誤';
                 document.getElementById('loginSuccess').textContent = '';
             });
         });
