@@ -95,6 +95,10 @@
         .product-actions button {
             width: auto;
         }
+        #viewOrdersBtn {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -149,14 +153,10 @@
             <button id="nextPage" disabled>下一頁</button>
         </div>
 
-        <!-- 訂單管理 -->
-        <form id="orderForm">
-            <h2>新增訂單</h2>
-            <input type="number" id="orderUserId" placeholder="用戶ID" required>
-            <button type="submit">提交訂單</button>
-            <div class="error" id="orderError"></div>
-        </form>
+        <!-- 查看訂單按鈕 -->
+        <button id="viewOrdersBtn">查看我的訂單</button>
 
+        <!-- 訂單列表 -->
         <div class="order-list" id="orderList"></div>
     </div>
 
@@ -224,6 +224,7 @@
                 currentUser = data; // 保存用戶信息
                 document.getElementById('loginSuccess').textContent = '登入成功';
                 document.getElementById('loginError').textContent = '';
+                document.getElementById('viewOrdersBtn').style.display = 'block'; // 顯示查看訂單按鈕
                 fetchProducts(); // 登入成功後載入商品
             })
             .catch(error => {
@@ -348,6 +349,40 @@
             .catch(error => {
                 alert('加入訂單失敗: ' + error.message);
             });
+        }
+
+        // 新增查看訂單功能
+        document.getElementById('viewOrdersBtn').addEventListener('click', () => {
+            if (currentUser) {
+                fetchUserOrders(currentUser.userId);
+            } else {
+                alert('請先登入');
+            }
+        });
+
+        // 新增獲取用戶訂單的函數
+        function fetchUserOrders(userId) {
+            fetch(`http://localhost:8080/user/${userId}/orders`)
+                .then(response => response.json())
+                .then(data => {
+                    const orderList = document.getElementById('orderList');
+                    orderList.innerHTML = '<h2>我的訂單</h2>';
+                    if (data.length === 0) {
+                        orderList.innerHTML += '<p>您還沒有任何訂單</p>';
+                    } else {
+                        data.forEach(order => {
+                            const orderDiv = document.createElement('div');
+                            orderDiv.className = 'order';
+                            orderDiv.innerHTML = `
+                                <p>訂單ID: ${order.orderId}</p>
+                                <p>訂單金額: $${order.totalAmount}</p>
+                                <p>創建日期: ${new Date(order.createdDate).toLocaleString()}</p>
+                            `;
+                            orderList.appendChild(orderDiv);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error fetching orders:', error));
         }
 
         // 頁面加載時取得商品
