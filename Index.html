@@ -99,6 +99,16 @@
             display: none;
             margin-top: 20px;
         }
+        .order-details {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .order-item {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -216,7 +226,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('登入失敗');
+                    throw new Error('登入失敗：帳號或密碼錯誤');
                 }
                 return response.json();
             })
@@ -382,6 +392,8 @@
                                 <p>訂單ID: ${order.orderId}</p>
                                 <p>訂單金額: $${order.totalAmount}</p>
                                 <p>創建日期: ${new Date(order.createdDate).toLocaleString()}</p>
+                                <button onclick="fetchOrderDetails(${order.orderId})">查看詳情</button>
+                                <div id="orderDetails-${order.orderId}" class="order-details" style="display: none;"></div>
                             `;
                             orderList.appendChild(orderDiv);
                         });
@@ -391,6 +403,40 @@
                     console.error('Error fetching orders:', error);
                     alert('獲取訂單失敗: ' + error.message);
                 });
+        }
+
+        // 新增獲取訂單詳情的函數
+        function fetchOrderDetails(orderId) {
+            const detailsDiv = document.getElementById(`orderDetails-${orderId}`);
+            if (detailsDiv.style.display === 'none') {
+                fetch(`http://localhost:8080/orders/${orderId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('獲取訂單詳情失敗');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        let detailsHtml = '<h3>訂單詳情</h3>';
+                        data.orderItemList.forEach(item => {
+                            detailsHtml += `
+                                <div class="order-item">
+                                    <p>商品名稱: ${item.productName}</p>
+                                    <p>數量: ${item.quantity}</p>
+                                    <p>單價: $${item.amount}</p>
+                                </div>
+                            `;
+                        });
+                        detailsDiv.innerHTML = detailsHtml;
+                        detailsDiv.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching order details:', error);
+                        alert('獲取訂單詳情失敗: ' + error.message);
+                    });
+            } else {
+                detailsDiv.style.display = 'none';
+            }
         }
 
         // 頁面加載時取得商品
