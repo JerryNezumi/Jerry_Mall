@@ -184,7 +184,7 @@
                 } else if (error.message) {
                     document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
                 } else {
-                    document.getElementById('registerError').textContent = '註冊失敗，請稍後再試';
+                    document.getElementById('registerError').textContent = '註冊失敗，該email已被註冊';
                 }
                 document.getElementById('registerSuccess').textContent = '';
             });
