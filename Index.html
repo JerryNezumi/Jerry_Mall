@@ -83,6 +83,18 @@
         .order-list {
             margin-top: 20px;
         }
+        .product-actions {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .product-actions select {
+            width: auto;
+            margin-right: 10px;
+        }
+        .product-actions button {
+            width: auto;
+        }
     </style>
 </head>
 <body>
@@ -141,8 +153,6 @@
         <form id="orderForm">
             <h2>新增訂單</h2>
             <input type="number" id="orderUserId" placeholder="用戶ID" required>
-            <input type="number" id="productId" placeholder="商品ID" required>
-            <input type="number" id="quantity" placeholder="數量" required min="1">
             <button type="submit">提交訂單</button>
             <div class="error" id="orderError"></div>
         </form>
@@ -153,6 +163,7 @@
     <script>
         let currentPage = 0;
         const pageSize = 5;
+        let currentUser = null; // 添加這行來存儲當前用戶信息
 
         // 註冊功能
         document.getElementById('registerForm').addEventListener('submit', (event) => {
@@ -210,12 +221,13 @@
                 return response.json();
             })
             .then(data => {
+                currentUser = data; // 保存用戶信息
                 document.getElementById('loginSuccess').textContent = '登入成功';
                 document.getElementById('loginError').textContent = '';
                 fetchProducts(); // 登入成功後載入商品
             })
             .catch(error => {
-                console.error('Login error:', error); // 添加這行來記錄完整的錯誤對象
+                console.error('Login error:', error);
                 document.getElementById('loginError').textContent = '登入失敗：帳號或密碼錯誤';
                 document.getElementById('loginSuccess').textContent = '';
             });
@@ -273,6 +285,14 @@
                                 <p>價格: $${product.price}</p>
                                 <p>庫存: ${product.stock}</p>
                                 <p>描述: ${product.description}</p>
+                                ${currentUser ? `
+                                    <div class="product-actions">
+                                        <select id="quantity-${product.productId}">
+                                            ${Array.from({length: 10}, (_, i) => i + 1).map(num => `<option value="${num}">${num}</option>`).join('')}
+                                        </select>
+                                        <button onclick="addToOrder(${product.productId})">加入訂單</button>
+                                    </div>
+                                ` : ''}
                             </div>
                         `;
                         productList.appendChild(productDiv);
@@ -301,21 +321,17 @@
             fetchProducts();
         });
 
-        // 新增訂單
-        document.getElementById('orderForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const userId = document.getElementById('orderUserId').value;
-            const productId = document.getElementById('productId').value;
-            const quantity = document.getElementById('quantity').value;
-
+        // 新增加入訂單功能
+        function addToOrder(productId) {
+            const quantity = document.getElementById(`quantity-${productId}`).value;
             const orderData = {
                 buyItemList: [{
-                    productId: parseInt(productId),
+                    productId: productId,
                     quantity: parseInt(quantity)
                 }]
             };
 
-            fetch(`http://localhost:8080/order/${userId}/orders`, {
+            fetch(`http://localhost:8080/order/${currentUser.userId}/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -327,35 +343,11 @@
                 return response.json();
             })
             .then(data => {
-                document.getElementById('orderError').textContent = '';
-                alert('訂單創建成功');
-                fetchUserOrders(userId); // 提交訂單後更新訂單列表
-                document.getElementById('orderForm').reset();
+                alert('商品已成功加入訂單');
             })
             .catch(error => {
-                document.getElementById('orderError').textContent = error.message;
+                alert('加入訂單失敗: ' + error.message);
             });
-        });
-
-        // 取得用戶訂單
-        function fetchUserOrders(userId) {
-            fetch(`http://localhost:8080/user/${userId}/orders`)
-                .then(response => response.json())
-                .then(data => {
-                    const orderList = document.getElementById('orderList');
-                    orderList.innerHTML = '';
-                    data.forEach(order => {
-                        const orderDiv = document.createElement('div');
-                        orderDiv.className = 'order';
-                        orderDiv.innerHTML = `
-                            <p>訂單ID: ${order.orderId}</p>
-                            <p>用戶ID: ${order.userId}</p>
-                            <p>訂單金額: $${order.totalPrice}</p>
-                        `;
-                        orderList.appendChild(orderDiv);
-                    });
-                })
-                .catch(error => console.error('Error fetching orders:', error));
         }
 
         // 頁面加載時取得商品
