@@ -141,6 +141,8 @@
         <form id="orderForm">
             <h2>新增訂單</h2>
             <input type="number" id="orderUserId" placeholder="用戶ID" required>
+            <input type="number" id="productId" placeholder="商品ID" required>
+            <input type="number" id="quantity" placeholder="數量" required min="1">
             <button type="submit">提交訂單</button>
             <div class="error" id="orderError"></div>
         </form>
@@ -303,12 +305,22 @@
         document.getElementById('orderForm').addEventListener('submit', (event) => {
             event.preventDefault();
             const userId = document.getElementById('orderUserId').value;
+            const productId = document.getElementById('productId').value;
+            const quantity = document.getElementById('quantity').value;
+
+            const orderData = {
+                buyItemList: [{
+                    productId: parseInt(productId),
+                    quantity: parseInt(quantity)
+                }]
+            };
 
             fetch(`http://localhost:8080/order/${userId}/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify(orderData)
             })
             .then(response => {
                 if (!response.ok) throw new Error('新增訂單失敗');
@@ -316,7 +328,9 @@
             })
             .then(data => {
                 document.getElementById('orderError').textContent = '';
+                alert('訂單創建成功');
                 fetchUserOrders(userId); // 提交訂單後更新訂單列表
+                document.getElementById('orderForm').reset();
             })
             .catch(error => {
                 document.getElementById('orderError').textContent = error.message;
