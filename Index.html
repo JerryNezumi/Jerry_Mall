@@ -9,6 +9,392 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f0f0f0; /* 整個頁面的背景色 */
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f0f0f0; /* 將容器背景也改為淺灰色 */
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        form, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .product {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .product img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 20px;
+            border-radius: 8px;
+        }
+        .error, .success {
+            margin-top: 10px;
+            color: red;
+            font-size: 14px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+        }
+        .pagination button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+        .order-list {
+            margin-top: 20px;
+        }
+        .product-actions {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .product-actions select {
+            width: auto;
+            margin-right: 10px;
+        }
+        .product-actions button {
+            width: auto;
+        }
+        #viewOrdersBtn {
+            display: none;
+            margin-top: 20px;
+        }
+        .order-details {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .order-item {
+            margin-bottom: 5px;
+        }
+
+        /* 新增的樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #f0f0f0; /* 模態框背景也改為淺灰色 */
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #merchantBtn {
+            display: none; /* 初始隱藏 */
+            margin-top: 20px;
+        }
+
+        /* 新增樣式，確保表單和其他元素有更好的可讀性 */
+        form, .product, .order-details {
+            background-color: #ffffff; /* 表單和產品卡片使用白色背景 */
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 調整商家功能中的表單背景 */
+        #merchantProductForm {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>商品管理系統</h1>
+    </header>
+
+    <div class="container">
+        <!-- 註冊表單 -->
+        <form id="registerForm">
+            <h2>註冊</h2>
+            <input type="email" id="registerEmail" placeholder="電子郵件" required>
+            <input type="password" id="registerPassword" placeholder="密碼" required>
+            <button type="submit">註冊</button>
+            <div class="success" id="registerSuccess"></div>
+            <div class="error" id="registerError"></div>
+        </form>
+
+        <!-- 登入表單 -->
+        <form id="loginForm">
+            <h2>登入</h2>
+            <input type="email" id="loginEmail" placeholder="電子郵件" required>
+            <input type="password" id="loginPassword" placeholder="密碼" required>
+            <button type="submit">登入</button>
+            <div class="success" id="loginSuccess"></div>
+            <div class="error" id="loginError"></div>
+        </form>
+
+        <!-- 查看訂單按鈕 (初始隱藏) -->
+        <button id="viewOrdersBtn" style="display: none;">查看我的訂單</button>
+
+        <!-- 訂單列表 -->
+        <div class="order-list" id="orderList"></div>
+
+        <!-- 新增商品 -->
+        <form id="productForm">
+            <h2>新增商品</h2>
+            <input type="text" id="productName" placeholder="商品名稱" required>
+            <select id="category" required>
+                <option value="" disabled selected>選擇類別</option>
+                <option value="ELECTRONICS">電子產品</option>
+                <option value="CLOTHING">服飾</option>
+                <option value="FOOD">食品</option>
+            </select>
+            <input type="text" id="imageUrl" placeholder="圖片網址" required>
+            <input type="number" id="price" placeholder="價格" required>
+            <input type="number" id="stock" placeholder="庫存" required>
+            <textarea id="description" placeholder="描述"></textarea>
+            <button type="submit">新增商品</button>
+            <div class="error" id="productError"></div>
+        </form>
+
+        <!-- 商品列表 -->
+        <div class="product-list" id="productList"></div>
+
+        <!-- 分頁 -->
+        <div class="pagination">
+            <button id="prevPage" disabled>上一頁</button>
+            <button id="nextPage" disabled>下一頁</button>
+        </div>
+
+        <!-- 新增商家功能按鈕 -->
+        <button id="merchantBtn" style="display: none;">商家功能</button>
+    </div>
+
+    <!-- 商家功能模態框 -->
+    <div id="merchantModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>商家功能</h2>
+            <form id="merchantProductForm">
+                <input type="hidden" id="productId">
+                <input type="text" id="merchantProductName" placeholder="商品名稱" required>
+                <select id="merchantCategory" required>
+                    <option value="" disabled selected>選擇類別</option>
+                    <option value="ELECTRONICS">電子產品</option>
+                    <option value="CLOTHING">服飾</option>
+                    <option value="FOOD">食品</option>
+                </select>
+                <input type="text" id="merchantImageUrl" placeholder="圖片網址" required>
+                <input type="number" id="merchantPrice" placeholder="價格" required>
+                <input type="number" id="merchantStock" placeholder="庫存" required>
+                <textarea id="merchantDescription" placeholder="描述"></textarea>
+                <button type="submit">保存商品</button>
+            </form>
+            <div id="merchantProductList"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        const pageSize = 5;
+        let currentUser = null; // 當前登入的使用者資料
+
+        // 註冊功能
+        document.getElementById('registerForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+
+            fetch('https://springboot-mall-2.onrender.com/User/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('registerSuccess').textContent = '註冊成功';
+                document.getElementById('registerError').textContent = '';
+            })
+            .catch(error => {
+                console.error('Registration error:', error); // 處理註冊錯誤
+                if (error.message === 'EMAIL_ALREADY_EXISTS') {
+                    document.getElementById('registerError').textContent = '該電子郵件已被註冊';
+                } else if (error.message) {
+                    document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
+                } else {
+                    document.getElementById('registerError').textContent = '註冊失敗，請檢查您的電子郵件是否已被註冊';
+                }
+                document.getElementById('registerSuccess').textContent = '';
+            });
+        });
+
+        // 登入功能
+        document.getElementById('loginForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            fetch('https://springboot-mall-2.onrender.com/User/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('登入失敗，請檢查您的帳號密碼是否正確');
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentUser = data; // 儲存當前登入的使用者資料
+                document.getElementById('loginSuccess').textContent = '登入成功';
+                document.getElementById('loginError').textContent = '';
+                document.getElementById('viewOrdersBtn').style.display = 'block'; // 顯示查看訂單按鈕
+                document.getElementById('merchantBtn').style.display = 'block'; // 顯示商家功能按鈕
+                document.getElementById('loginForm').style.display = 'none'; // 隱藏登入表單
+                document.getElementById('registerForm').style.display = 'none'; // 隱藏註冊表單
+                fetchProducts(); // 登入成功後取得商品列表
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                document.getElementById('loginError').textContent = '登入失敗，請檢查您的帳號密碼是否正確';
+                document.getElementById('loginSuccess').textContent = '';
+            });
+        });
+
+        // 新增商品
+        document.getElementById('productForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const productData = {
+                productName: document.getElementById('productName').value.trim(),
+                category: document.getElementById('category').value,
+                imageUrl: document.getElementById('imageUrl').value.trim(),
+                price: parseInt(document.getElementById('price').value),
+                stock: parseInt(document.getElementById('stock').value),
+                description: document.getElementById('description').value.trim()
+            };
+
+            fetch('https://springboot-mall-2.onrender.com/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('新增商品失敗');
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('productError').textContent = '';
+                fetchProducts(); // 重新取得商品列表
+                document.getElementById('productForm').reset();
+            })
+            .catch(error => {
+                document.getElementById('productError').textContent = error.message;
+            });
+        });
+
+        // 取得商品列表
+        function fetchProducts() {
+            fetch(`https://springboot-mall-2.onrender.com/products?limit=${pageSize}&offset=${currentPage * pageSize}`)
+                .then(response => response.json())
+                .then(data => {
+                    const productList = document.getElementById('productList');
+                    productList.innerHTML = '';
+                    data.results.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'product';
+                        productDiv.innerHTML = `
+                            <img src="${product.imageUrl}" alt="${product.productName}">
+                            <div>
+                                <h3>${product.productName}</h3>
+                                <p>類別: ${product.category}</p>
+                                <p>價格: $${product.price}</p>
+                                <p>庫存: ${product.stock}</p>
+                                <p>描述: ${product.description}</p>
+                                ${currentUser ? `
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerrymall</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             background-color: #f0f0f0; /* 修改這裡：將背景色改為淺灰色 */
         }
         header {
@@ -109,6 +495,48 @@
         .order-item {
             margin-bottom: 5px;
         }
+
+        /* 新增的樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #merchantBtn {
+            display: none; /* 初始隱藏 */
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -168,6 +596,33 @@
         <div class="pagination">
             <button id="prevPage" disabled>上一頁</button>
             <button id="nextPage" disabled>下一頁</button>
+        </div>
+
+        <!-- 新增商家功能按鈕 -->
+        <button id="merchantBtn" style="display: none;">商家功能</button>
+    </div>
+
+    <!-- 商家功能模態框 -->
+    <div id="merchantModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>商家功能</h2>
+            <form id="merchantProductForm">
+                <input type="hidden" id="productId">
+                <input type="text" id="merchantProductName" placeholder="商品名稱" required>
+                <select id="merchantCategory" required>
+                    <option value="" disabled selected>選擇類別</option>
+                    <option value="ELECTRONICS">電子產品</option>
+                    <option value="CLOTHING">服飾</option>
+                    <option value="FOOD">食品</option>
+                </select>
+                <input type="text" id="merchantImageUrl" placeholder="圖片網址" required>
+                <input type="number" id="merchantPrice" placeholder="價格" required>
+                <input type="number" id="merchantStock" placeholder="庫存" required>
+                <textarea id="merchantDescription" placeholder="描述"></textarea>
+                <button type="submit">保存商品</button>
+            </form>
+            <div id="merchantProductList"></div>
         </div>
     </div>
 
@@ -236,6 +691,7 @@
                 document.getElementById('loginSuccess').textContent = '登入成功';
                 document.getElementById('loginError').textContent = '';
                 document.getElementById('viewOrdersBtn').style.display = 'block'; // 顯示查看訂單按鈕
+                document.getElementById('merchantBtn').style.display = 'block'; // 顯示商家功能按鈕
                 document.getElementById('loginForm').style.display = 'none'; // 隱藏登入表單
                 document.getElementById('registerForm').style.display = 'none'; // 隱藏註冊表單
                 fetchProducts(); // 登入成功後取得商品列表
@@ -429,6 +885,119 @@
 
         // 頁面載入完成後取得商品列表
         window.onload = fetchProducts;
+
+        // 新增商家功能相關代碼
+        const merchantBtn = document.getElementById('merchantBtn');
+        const merchantModal = document.getElementById('merchantModal');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        merchantBtn.onclick = function() {
+            merchantModal.style.display = "block";
+            fetchMerchantProducts();
+        }
+
+        closeBtn.onclick = function() {
+            merchantModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == merchantModal) {
+                merchantModal.style.display = "none";
+            }
+        }
+
+        // 獲取商家商品列表
+        function fetchMerchantProducts() {
+            fetch('https://springboot-mall-2.onrender.com/products')
+                .then(response => response.json())
+                .then(data => {
+                    const merchantProductList = document.getElementById('merchantProductList');
+                    merchantProductList.innerHTML = '<h3>商品列表</h3>';
+                    data.results.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.innerHTML = `
+                            <p>${product.productName} - $${product.price}</p>
+                            <button onclick="editProduct(${product.productId})">編輯</button>
+                            <button onclick="deleteProduct(${product.productId})">刪除</button>
+                        `;
+                        merchantProductList.appendChild(productDiv);
+                    });
+                })
+                .catch(error => console.error('Error fetching merchant products:', error));
+        }
+
+        // 編輯商品
+        function editProduct(productId) {
+            fetch(`https://springboot-mall-2.onrender.com/products/${productId}`)
+                .then(response => response.json())
+                .then(product => {
+                    document.getElementById('productId').value = product.productId;
+                    document.getElementById('merchantProductName').value = product.productName;
+                    document.getElementById('merchantCategory').value = product.category;
+                    document.getElementById('merchantImageUrl').value = product.imageUrl;
+                    document.getElementById('merchantPrice').value = product.price;
+                    document.getElementById('merchantStock').value = product.stock;
+                    document.getElementById('merchantDescription').value = product.description;
+                })
+                .catch(error => console.error('Error fetching product details:', error));
+        }
+
+        // 刪除商品
+        function deleteProduct(productId) {
+            if (confirm('確定要刪除這個商品嗎？')) {
+                fetch(`https://springboot-mall-2.onrender.com/products/${productId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('商品已成功刪除');
+                        fetchMerchantProducts();
+                    } else {
+                        throw new Error('刪除商品失敗');
+                    }
+                })
+                .catch(error => console.error('Error deleting product:', error));
+            }
+        }
+
+        // 處理商家商品表單提交
+        document.getElementById('merchantProductForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const productId = document.getElementById('productId').value;
+            const productData = {
+                productName: document.getElementById('merchantProductName').value.trim(),
+                category: document.getElementById('merchantCategory').value,
+                imageUrl: document.getElementById('merchantImageUrl').value.trim(),
+                price: parseInt(document.getElementById('merchantPrice').value),
+                stock: parseInt(document.getElementById('merchantStock').value),
+                description: document.getElementById('merchantDescription').value.trim()
+            };
+
+            const url = productId ? `https://springboot-mall-2.onrender.com/products/${productId}` : 'https://springboot-mall-2.onrender.com/products';
+            const method = productId ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('保存商品失敗');
+                return response.json();
+            })
+            .then(data => {
+                alert('商品已成功保存');
+                document.getElementById('merchantProductForm').reset();
+                document.getElementById('productId').value = '';
+                fetchMerchantProducts();
+            })
+            .catch(error => {
+                console.error('Error saving product:', error);
+                alert('保存商品失敗: ' + error.message);
+            });
+        });
     </script>
 </body>
 </html>
