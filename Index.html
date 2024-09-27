@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商品管理系統</title>
+    <title>Jerrymall</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -127,6 +127,7 @@
             <div class="error" id="registerError"></div>
         </form>
 
+        <!-- 登入表單 -->
         <form id="loginForm">
             <h2>登入</h2>
             <input type="email" id="loginEmail" placeholder="電子郵件" required>
@@ -135,6 +136,12 @@
             <div class="success" id="loginSuccess"></div>
             <div class="error" id="loginError"></div>
         </form>
+
+        <!-- 查看訂單按鈕 (初始隱藏) -->
+        <button id="viewOrdersBtn" style="display: none;">查看我的訂單</button>
+
+        <!-- 訂單列表 -->
+        <div class="order-list" id="orderList"></div>
 
         <!-- 新增商品 -->
         <form id="productForm">
@@ -162,12 +169,6 @@
             <button id="prevPage" disabled>上一頁</button>
             <button id="nextPage" disabled>下一頁</button>
         </div>
-
-        <!-- 查看訂單按鈕 -->
-        <button id="viewOrdersBtn">查看我的訂單</button>
-
-        <!-- 訂單列表 -->
-        <div class="order-list" id="orderList"></div>
     </div>
 
     <script>
@@ -235,6 +236,8 @@
                 document.getElementById('loginSuccess').textContent = '登入成功';
                 document.getElementById('loginError').textContent = '';
                 document.getElementById('viewOrdersBtn').style.display = 'block'; // 顯示查看訂單按鈕
+                document.getElementById('loginForm').style.display = 'none'; // 隱藏登入表單
+                document.getElementById('registerForm').style.display = 'none'; // 隱藏註冊表單
                 fetchProducts(); // 登入成功後取得商品列表
             })
             .catch(error => {
@@ -361,7 +364,7 @@
             });
         }
 
-        // 查看訂單
+        // 查看訂單按鈕點擊事件
         document.getElementById('viewOrdersBtn').addEventListener('click', () => {
             if (currentUser) {
                 fetchUserOrders(currentUser.userId);
