@@ -215,6 +215,60 @@
         #merchantPagination button:hover:not(:disabled) {
             background-color: #e0e0e0;
         }
+
+        /* 調整分頁按鈕樣式 */
+        .pagination button, #merchantPagination button {
+            margin: 0 1px;
+            padding: 2px 4px;
+            font-size: 8px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            cursor: pointer;
+            min-width: 16px;
+            height: 16px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination button:disabled, #merchantPagination button:disabled {
+            background-color: #4da6ff;
+            color: white;
+            cursor: default;
+        }
+
+        .pagination button:hover:not(:disabled), #merchantPagination button:hover:not(:disabled) {
+            background-color: #e0e0e0;
+        }
+
+        /* 調整分頁按鈕樣式 */
+        .pagination button, #merchantPagination button {
+            margin: 0 1px;
+            padding: 2px 4px;
+            font-size: 8px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            cursor: pointer;
+            min-width: 16px;
+            height: 16px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination button:disabled, #merchantPagination button:disabled {
+            background-color: #4da6ff;
+            color: white;
+            cursor: default;
+        }
+
+        .pagination button:hover:not(:disabled), #merchantPagination button:hover:not(:disabled) {
+            background-color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -223,6 +277,9 @@
     </header>
 
     <div class="container">
+        <!-- 啟動按鈕 -->
+        <button id="activateBtn" style="margin-bottom: 20px;">啟動</button>
+
         <!-- 註冊表單 -->
         <form id="registerForm">
             <h2>註冊</h2>
@@ -738,6 +795,19 @@
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
+        });
+
+        // 添加啟動按鈕的事件監聽器
+        document.getElementById('activateBtn').addEventListener('click', () => {
+            fetch('https://springboot-mall-2.onrender.com/activate')
+                .then(response => response.text())
+                .then(data => {
+                    alert(data); // 顯示後端返回的消息
+                })
+                .catch(error => {
+                    console.error('Activation error:', error);
+                    alert('啟動失敗，請稍後再試');
+                });
         });
     </script>
 </body>
