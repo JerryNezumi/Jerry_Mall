@@ -66,16 +66,24 @@
         .pagination {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         .pagination button {
-            margin: 0 5px;
-            padding: 10px 15px;
+            margin: 0 2px;
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: #f0f0f0;
             border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
         }
         .pagination button:disabled {
-            background-color: #ddd;
-            cursor: not-allowed;
+            background-color: #4da6ff;
+            color: white;
+            cursor: default;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: #e0e0e0;
         }
         .order-list {
             margin-top: 20px;
@@ -168,6 +176,32 @@
 
         #productForm {
             display: none; /* 初始隱藏新增商品表單 */
+        }
+
+        #merchantPagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        #merchantPagination button {
+            margin: 0 2px;
+            padding: 5px 10px;
+            font-size: 12px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        #merchantPagination button:disabled {
+            background-color: #4da6ff;
+            color: white;
+            cursor: default;
+        }
+
+        #merchantPagination button:hover:not(:disabled) {
+            background-color: #e0e0e0;
         }
     </style>
 </head>
@@ -354,18 +388,57 @@
             const paginationDiv = document.getElementById('pagination');
             paginationDiv.innerHTML = '';
 
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.textContent = i;
-                pageButton.addEventListener('click', () => {
-                    currentPage = i;
+            // 添加上一頁按鈕
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '←';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
                     fetchProducts();
-                });
-                if (i === currentPage) {
-                    pageButton.disabled = true;
                 }
-                paginationDiv.appendChild(pageButton);
+            });
+            paginationDiv.appendChild(prevButton);
+
+            // 添加頁碼按鈕
+            for (let i = 1; i <= totalPages; i++) {
+                if (
+                    i === 1 ||
+                    i === totalPages ||
+                    (i >= currentPage - 1 && i <= currentPage + 1)
+                ) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => {
+                        currentPage = i;
+                        fetchProducts();
+                    });
+                    if (i === currentPage) {
+                        pageButton.disabled = true;
+                    }
+                    paginationDiv.appendChild(pageButton);
+                } else if (
+                    i === currentPage - 2 ||
+                    i === currentPage + 2
+                ) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.margin = '0 5px';
+                    paginationDiv.appendChild(ellipsis);
+                }
             }
+
+            // 添加下一頁按鈕
+            const nextButton = document.createElement('button');
+            nextButton.textContent = '→';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    fetchProducts();
+                }
+            });
+            paginationDiv.appendChild(nextButton);
         }
 
         // 初始化時隱藏商品列表
@@ -500,18 +573,57 @@
             const paginationDiv = document.getElementById('merchantPagination');
             paginationDiv.innerHTML = '';
 
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.textContent = i;
-                pageButton.addEventListener('click', () => {
-                    merchantCurrentPage = i;
+            // 添加上一頁按鈕
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '←';
+            prevButton.disabled = merchantCurrentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (merchantCurrentPage > 1) {
+                    merchantCurrentPage--;
                     fetchMerchantProducts();
-                });
-                if (i === merchantCurrentPage) {
-                    pageButton.disabled = true;
                 }
-                paginationDiv.appendChild(pageButton);
+            });
+            paginationDiv.appendChild(prevButton);
+
+            // 添加頁碼按鈕
+            for (let i = 1; i <= totalPages; i++) {
+                if (
+                    i === 1 ||
+                    i === totalPages ||
+                    (i >= merchantCurrentPage - 1 && i <= merchantCurrentPage + 1)
+                ) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => {
+                        merchantCurrentPage = i;
+                        fetchMerchantProducts();
+                    });
+                    if (i === merchantCurrentPage) {
+                        pageButton.disabled = true;
+                    }
+                    paginationDiv.appendChild(pageButton);
+                } else if (
+                    i === merchantCurrentPage - 2 ||
+                    i === merchantCurrentPage + 2
+                ) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.margin = '0 5px';
+                    paginationDiv.appendChild(ellipsis);
+                }
             }
+
+            // 添加下一頁按鈕
+            const nextButton = document.createElement('button');
+            nextButton.textContent = '→';
+            nextButton.disabled = merchantCurrentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (merchantCurrentPage < totalPages) {
+                    merchantCurrentPage++;
+                    fetchMerchantProducts();
+                }
+            });
+            paginationDiv.appendChild(nextButton);
         }
 
         // 修改編輯商品函數
