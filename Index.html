@@ -220,22 +220,7 @@
             <h2>商家功能</h2>
             <button id="addNewProductBtn">新增商品</button>
             <div id="merchantProductList"></div>
-            <form id="editProductForm" style="display:none;">
-                <h3>編輯商品</h3>
-                <input type="hidden" id="editProductId">
-                <input type="text" id="editProductName" placeholder="商品名稱" required>
-                <select id="editProductCategory" required>
-                    <option value="" disabled selected>選擇類別</option>
-                    <option value="ELECTRONICS">電子產品</option>
-                    <option value="CLOTHING">服飾</option>
-                    <option value="FOOD">食品</option>
-                </select>
-                <input type="text" id="editProductImageUrl" placeholder="圖片網址" required>
-                <input type="number" id="editProductPrice" placeholder="價格" required>
-                <input type="number" id="editProductStock" placeholder="庫存" required>
-                <textarea id="editProductDescription" placeholder="描述"></textarea>
-                <button type="submit">更新商品</button>
-            </form>
+            <div id="merchantPagination"></div>
         </div>
     </div>
 
@@ -257,6 +242,29 @@
                 <input type="number" id="newProductStock" placeholder="庫存" required>
                 <textarea id="newProductDescription" placeholder="描述"></textarea>
                 <button type="submit">新增商品</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 編輯商品模態框 -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>編輯商品</h2>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                <input type="text" id="editProductName" placeholder="商品名稱" required>
+                <select id="editProductCategory" required>
+                    <option value="" disabled selected>選擇類別</option>
+                    <option value="ELECTRONICS">電子產品</option>
+                    <option value="CLOTHING">服飾</option>
+                    <option value="FOOD">食品</option>
+                </select>
+                <input type="text" id="editProductImageUrl" placeholder="圖片網址" required>
+                <input type="number" id="editProductPrice" placeholder="價格" required>
+                <input type="number" id="editProductStock" placeholder="庫存" required>
+                <textarea id="editProductDescription" placeholder="描述"></textarea>
+                <button type="submit">更新商品</button>
             </form>
         </div>
     </div>
@@ -460,9 +468,13 @@
             fetchMerchantProducts();
         });
 
-        // 獲取商家商品列表
+        let merchantCurrentPage = 1;
+        const merchantPageSize = 5;
+        let merchantTotalProducts = 0;
+
+        // 修改獲取商家商品列表函數
         function fetchMerchantProducts() {
-            fetch('https://springboot-mall-2.onrender.com/products')
+            fetch(`https://springboot-mall-2.onrender.com/products?limit=${merchantPageSize}&offset=${(merchantCurrentPage - 1) * merchantPageSize}`)
                 .then(response => response.json())
                 .then(data => {
                     const merchantProductList = document.getElementById('merchantProductList');
@@ -476,11 +488,33 @@
                         `;
                         merchantProductList.appendChild(productDiv);
                     });
+                    merchantTotalProducts = data.total;
+                    updateMerchantPagination();
                 })
                 .catch(error => console.error('Error fetching merchant products:', error));
         }
 
-        // 編輯商品
+        // 添加商家商品列表分頁函數
+        function updateMerchantPagination() {
+            const totalPages = Math.ceil(merchantTotalProducts / merchantPageSize);
+            const paginationDiv = document.getElementById('merchantPagination');
+            paginationDiv.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.addEventListener('click', () => {
+                    merchantCurrentPage = i;
+                    fetchMerchantProducts();
+                });
+                if (i === merchantCurrentPage) {
+                    pageButton.disabled = true;
+                }
+                paginationDiv.appendChild(pageButton);
+            }
+        }
+
+        // 修改編輯商品函數
         function editProduct(productId) {
             fetch(`https://springboot-mall-2.onrender.com/products/${productId}`)
                 .then(response => response.json())
@@ -492,12 +526,12 @@
                     document.getElementById('editProductPrice').value = product.price;
                     document.getElementById('editProductStock').value = product.stock;
                     document.getElementById('editProductDescription').value = product.description;
-                    document.getElementById('editProductForm').style.display = 'block';
+                    document.getElementById('editProductModal').style.display = 'block';
                 })
                 .catch(error => console.error('Error fetching product details:', error));
         }
 
-        // 處理編輯商品表單提交
+        // 修改處理編輯商品表單提交
         document.getElementById('editProductForm').addEventListener('submit', (event) => {
             event.preventDefault();
             const productId = document.getElementById('editProductId').value;
@@ -523,7 +557,7 @@
             })
             .then(data => {
                 alert('商品已成功更新');
-                document.getElementById('editProductForm').style.display = 'none';
+                document.getElementById('editProductModal').style.display = 'none';
                 fetchMerchantProducts();
             })
             .catch(error => {
