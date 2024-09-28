@@ -220,6 +220,22 @@
             <h2>商家功能</h2>
             <button id="addNewProductBtn">新增商品</button>
             <div id="merchantProductList"></div>
+            <form id="editProductForm" style="display:none;">
+                <h3>編輯商品</h3>
+                <input type="hidden" id="editProductId">
+                <input type="text" id="editProductName" placeholder="商品名稱" required>
+                <select id="editProductCategory" required>
+                    <option value="" disabled selected>選擇類別</option>
+                    <option value="ELECTRONICS">電子產品</option>
+                    <option value="CLOTHING">服飾</option>
+                    <option value="FOOD">食品</option>
+                </select>
+                <input type="text" id="editProductImageUrl" placeholder="圖片網址" required>
+                <input type="number" id="editProductPrice" placeholder="價格" required>
+                <input type="number" id="editProductStock" placeholder="庫存" required>
+                <textarea id="editProductDescription" placeholder="描述"></textarea>
+                <button type="submit">更新商品</button>
+            </form>
         </div>
     </div>
 
@@ -469,17 +485,52 @@
             fetch(`https://springboot-mall-2.onrender.com/products/${productId}`)
                 .then(response => response.json())
                 .then(product => {
-                    document.getElementById('productId').value = product.productId;
-                    document.getElementById('merchantProductName').value = product.productName;
-                    document.getElementById('merchantCategory').value = product.category;
-                    document.getElementById('merchantImageUrl').value = product.imageUrl;
-                    document.getElementById('merchantPrice').value = product.price;
-                    document.getElementById('merchantStock').value = product.stock;
-                    document.getElementById('merchantDescription').value = product.description;
-                    document.getElementById('saveProductBtn').textContent = '更新商品';
+                    document.getElementById('editProductId').value = product.productId;
+                    document.getElementById('editProductName').value = product.productName;
+                    document.getElementById('editProductCategory').value = product.category;
+                    document.getElementById('editProductImageUrl').value = product.imageUrl;
+                    document.getElementById('editProductPrice').value = product.price;
+                    document.getElementById('editProductStock').value = product.stock;
+                    document.getElementById('editProductDescription').value = product.description;
+                    document.getElementById('editProductForm').style.display = 'block';
                 })
                 .catch(error => console.error('Error fetching product details:', error));
         }
+
+        // 處理編輯商品表單提交
+        document.getElementById('editProductForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const productId = document.getElementById('editProductId').value;
+            const productData = {
+                productName: document.getElementById('editProductName').value.trim(),
+                category: document.getElementById('editProductCategory').value,
+                imageUrl: document.getElementById('editProductImageUrl').value.trim(),
+                price: parseInt(document.getElementById('editProductPrice').value),
+                stock: parseInt(document.getElementById('editProductStock').value),
+                description: document.getElementById('editProductDescription').value.trim()
+            };
+
+            fetch(`https://springboot-mall-2.onrender.com/products/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('更新商品失敗');
+                return response.json();
+            })
+            .then(data => {
+                alert('商品已成功更新');
+                document.getElementById('editProductForm').style.display = 'none';
+                fetchMerchantProducts();
+            })
+            .catch(error => {
+                console.error('Error updating product:', error);
+                alert('更新商品失敗: ' + error.message);
+            });
+        });
 
         // 刪除商品
         function deleteProduct(productId) {
@@ -498,46 +549,6 @@
                 .catch(error => console.error('Error deleting product:', error));
             }
         }
-
-        // 處理商家商品表單提交
-        document.getElementById('merchantProductForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const productId = document.getElementById('productId').value;
-            const productData = {
-                productName: document.getElementById('merchantProductName').value.trim(),
-                category: document.getElementById('merchantCategory').value,
-                imageUrl: document.getElementById('merchantImageUrl').value.trim(),
-                price: parseInt(document.getElementById('merchantPrice').value),
-                stock: parseInt(document.getElementById('merchantStock').value),
-                description: document.getElementById('merchantDescription').value.trim()
-            };
-
-            const url = productId ? `https://springboot-mall-2.onrender.com/products/${productId}` : 'https://springboot-mall-2.onrender.com/products';
-            const method = productId ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(productData)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('保存商品失敗');
-                return response.json();
-            })
-            .then(data => {
-                alert('商品已成功保存');
-                document.getElementById('merchantProductForm').reset();
-                document.getElementById('productId').value = '';
-                document.getElementById('saveProductBtn').textContent = '保存商品';
-                fetchMerchantProducts();
-            })
-            .catch(error => {
-                console.error('Error saving product:', error);
-                alert('保存商品失敗: ' + error.message);
-            });
-        });
 
         // 添加關閉商家功能模態框的邏輯
         document.querySelector('.close').addEventListener('click', () => {
