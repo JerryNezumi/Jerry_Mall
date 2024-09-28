@@ -1,169 +1,24 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jerry-mall</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0; /* 整個頁面的背景色 */
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #f0f0f0; /* 將容器背景也改為淺灰色 */
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        form, select, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .product {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .product img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 20px;
-            border-radius: 8px;
-        }
-        .error, .success {
-            margin-top: 10px;
-            color: red;
-            font-size: 14px;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .pagination button {
-            margin: 0 5px;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-        }
-        .pagination button:disabled {
-            background-color: #ddd;
-            cursor: not-allowed;
-        }
-        .order-list {
-            margin-top: 20px;
-        }
-        .product-actions {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .product-actions select {
-            width: auto;
-            margin-right: 10px;
-        }
-        .product-actions button {
-            width: auto;
-        }
-        #viewOrdersBtn {
-            display: none;
-            margin-top: 20px;
-        }
-        .order-details {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-        }
-        .order-item {
-            margin-bottom: 5px;
-        }
-
-        /* 新增的樣式 */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: #f0f0f0; /* 模態框背景也改為淺灰色 */
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        #merchantBtn {
-            display: none; /* 初始隱藏 */
-            margin-top: 20px;
-        }
-
-        /* 新增樣式，確保表單和其他元素有更好的可讀性 */
-        form, .product, .order-details {
-            background-color: #ffffff; /* 表單和產品卡片使用白色背景 */
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 調整商家功能中的表單背景 */
-        #merchantProductForm {
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+        /* 基本样式 */
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        header { background: #333; color: #fff; padding: 10px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .product, .order { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .order-details { margin-top: 10px; }
+        .success, .error { color: green; margin: 10px 0; }
+        .error { color: red; }
+        .modal { display: none; }
+        button { cursor: pointer; }
+        input, select, textarea { width: calc(100% - 20px); padding: 10px; margin: 5px 0; }
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
         }
     </style>
 </head>
@@ -193,13 +48,9 @@
             <div class="error" id="loginError"></div>
         </form>
 
-        <!-- 查看訂單按鈕 (初始隱藏) -->
         <button id="viewOrdersBtn" style="display: none;">查看我的訂單</button>
-
-        <!-- 訂單列表 -->
         <div class="order-list" id="orderList"></div>
 
-        <!-- 新增商品 -->
         <form id="productForm">
             <h2>新增商品</h2>
             <input type="text" id="productName" placeholder="商品名稱" required>
@@ -210,54 +61,36 @@
                 <option value="FOOD">食品</option>
             </select>
             <input type="text" id="imageUrl" placeholder="圖片網址" required>
-            <input type="number" id="price" placeholder="價格" required>
-            <input type="number" id="stock" placeholder="庫存" required>
+            <input type="number" id="price" placeholder="價格" required min="0>
+            <input type="number" id="stock" placeholder="庫存" required min="0>
             <textarea id="description" placeholder="描述"></textarea>
             <button type="submit">新增商品</button>
             <div class="error" id="productError"></div>
         </form>
 
-        <!-- 商品列表 -->
         <div class="product-list" id="productList"></div>
 
-        <!-- 分頁 -->
         <div class="pagination">
             <button id="prevPage" disabled>上一頁</button>
             <button id="nextPage" disabled>下一頁</button>
         </div>
 
-        <!-- 新增商家功能按鈕 -->
         <button id="merchantBtn" style="display: none;">商家功能</button>
-    </div>
-
-    <!-- 商家功能模態框 -->
-    <div id="merchantModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>商家功能</h2>
-            <form id="merchantProductForm">
-                <input type="hidden" id="productId">
-                <input type="text" id="merchantProductName" placeholder="商品名稱" required>
-                <select id="merchantCategory" required>
-                    <option value="" disabled selected>選擇類別</option>
-                    <option value="ELECTRONICS">電子產品</option>
-                    <option value="CLOTHING">服飾</option>
-                    <option value="FOOD">食品</option>
-                </select>
-                <input type="text" id="merchantImageUrl" placeholder="圖片網址" required>
-                <input type="number" id="merchantPrice" placeholder="價格" required>
-                <input type="number" id="merchantStock" placeholder="庫存" required>
-                <textarea id="merchantDescription" placeholder="描述"></textarea>
-                <button type="submit">保存商品</button>
-            </form>
-            <div id="merchantProductList"></div>
-        </div>
     </div>
 
     <script>
         let currentPage = 0;
         const pageSize = 5;
-        let currentUser = null; // 當前登入的使用者資料
+        let currentUser = null;
+
+        // 封装fetch请求
+        function fetchData(url, options) {
+            return fetch(url, options)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                });
+        }
 
         // 註冊功能
         document.getElementById('registerForm').addEventListener('submit', (event) => {
@@ -265,32 +98,19 @@
             const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value.trim();
 
-            fetch('https://springboot-mall-2.onrender.com/User/register', {
+            fetchData('https://springboot-mall-2.onrender.com/User/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw err; });
-                }
-                return response.json();
-            })
-            .then(data => {
+            .then(() => {
                 document.getElementById('registerSuccess').textContent = '註冊成功';
                 document.getElementById('registerError').textContent = '';
+                document.getElementById('registerForm').reset();
             })
             .catch(error => {
                 console.error('Registration error:', error);
-                if (error.message === 'EMAIL_ALREADY_EXISTS') {
-                    document.getElementById('registerError').textContent = '該電子郵件已被註冊';
-                } else if (error.message) {
-                    document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
-                } else {
-                    document.getElementById('registerError').textContent = '註冊失敗，請稍後再試';
-                }
+                document.getElementById('registerError').textContent = error.message;
                 document.getElementById('registerSuccess').textContent = '';
             });
         });
@@ -301,28 +121,20 @@
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
-            fetch('https://springboot-mall-2.onrender.com/User/login', {
+            fetchData('https://springboot-mall-2.onrender.com/User/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('登入失敗，請檢查您的帳號密碼是否正確');
-                }
-                return response.json();
-            })
             .then(data => {
-                currentUser = data; // 儲存當前登入的使用者資料
+                currentUser = data;
                 document.getElementById('loginSuccess').textContent = '登入成功';
                 document.getElementById('loginError').textContent = '';
-                document.getElementById('viewOrdersBtn').style.display = 'block'; // 顯示查看訂單按鈕
-                document.getElementById('merchantBtn').style.display = 'block'; // 顯示商家功能按鈕
-                document.getElementById('loginForm').style.display = 'none'; // 隱藏登入表單
-                document.getElementById('registerForm').style.display = 'none'; // 隱藏註冊表單
-                fetchProducts(); // 登入成功後取得商品列表
+                document.getElementById('viewOrdersBtn').style.display = 'block';
+                document.getElementById('merchantBtn').style.display = 'block';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'none';
+                fetchProducts();
             })
             .catch(error => {
                 console.error('Login error:', error);
@@ -334,7 +146,6 @@
         // 新增商品
         document.getElementById('productForm').addEventListener('submit', (event) => {
             event.preventDefault();
-
             const productData = {
                 productName: document.getElementById('productName').value.trim(),
                 category: document.getElementById('category').value,
@@ -344,20 +155,14 @@
                 description: document.getElementById('description').value.trim()
             };
 
-            fetch('https://springboot-mall-2.onrender.com/products', {
+            fetchData('https://springboot-mall-2.onrender.com/products', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(productData)
             })
-            .then(response => {
-                if (!response.ok) throw new Error('新增商品失敗');
-                return response.json();
-            })
-            .then(data => {
+            .then(() => {
                 document.getElementById('productError').textContent = '';
-                fetchProducts(); // 重新取得商品列表
+                fetchProducts();
                 document.getElementById('productForm').reset();
             })
             .catch(error => {
@@ -367,11 +172,11 @@
 
         // 取得商品列表
         function fetchProducts() {
-            fetch(`https://springboot-mall-2.onrender.com/products?limit=${pageSize}&offset=${currentPage * pageSize}`)
-                .then(response => response.json())
+            fetchData(`https://springboot-mall-2.onrender.com/products?limit=${pageSize}&offset=${currentPage * pageSize}`)
                 .then(data => {
                     const productList = document.getElementById('productList');
                     productList.innerHTML = '';
+                    const fragment = document.createDocumentFragment();
                     data.results.forEach(product => {
                         const productDiv = document.createElement('div');
                         productDiv.className = 'product';
@@ -386,69 +191,41 @@
                                 ${currentUser ? `
                                     <div class="product-actions">
                                         <select id="quantity-${product.productId}">
-                                            ${Array.from({length: 10}, (_, i) => i + 1).map(num => `<option value="${num}">${num}</option>`).join('')}
+                                            ${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('')}
                                         </select>
                                         <button class="add-to-cart" data-product-id="${product.productId}">加入購物車</button>
                                     </div>
                                 ` : ''}
                             </div>
                         `;
-                        productList.appendChild(productDiv);
+                        fragment.appendChild(productDiv);
                     });
-
-                    // 添加事件委託
-                    productList.addEventListener('click', function(e) {
-                        if (e.target.classList.contains('add-to-cart')) {
-                            const productId = e.target.getAttribute('data-product-id');
-                            const quantity = document.getElementById(`quantity-${productId}`).value;
-                            addToOrder(productId, quantity);
-                        }
-                    });
-
-                    updatePaginationButtons(data.total);
+                    productList.appendChild(fragment);
+                    updatePagination(data.totalCount);
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
                 });
         }
 
-        // 分頁按鈕事件處理
-        document.getElementById('prevPage').addEventListener('click', () => {
-            if (currentPage > 0) {
-                currentPage--;
-                fetchProducts();
-            }
-        });
-
-        document.getElementById('nextPage').addEventListener('click', () => {
-            currentPage++;
-            fetchProducts();
-        });
-
-        // 更新分頁按鈕狀態
-        function updatePaginationButtons(totalCount) {
+        // 更新分页状态
+        function updatePagination(totalCount) {
             document.getElementById('prevPage').disabled = currentPage === 0;
             document.getElementById('nextPage').disabled = (currentPage + 1) * pageSize >= totalCount;
         }
 
-        // 添加 addToOrder 函數
+        // 添加到购物车
         function addToOrder(productId, quantity) {
             const orderData = {
-                buyItemList: [{
-                    productId: parseInt(productId),
-                    quantity: parseInt(quantity)
-                }]
+                buyItemList: [{ productId: parseInt(productId), quantity: parseInt(quantity) }]
             };
 
-            fetch(`https://springboot-mall-2.onrender.com/order/${currentUser.userId}/orders`, {
+            fetchData(`https://springboot-mall-2.onrender.com/order/${currentUser.userId}/orders`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             })
-            .then(response => {
-                if (!response.ok) throw new Error('加入購物車失敗');
-                return response.json();
-            })
-            .then(data => {
+            .then(() => {
                 alert('已成功加入購物車');
             })
             .catch(error => {
@@ -467,19 +244,14 @@
 
         // 取得使用者訂單
         function fetchUserOrders(userId) {
-            fetch(`https://springboot-mall-2.onrender.com/user/${userId}/orders?limit=10&offset=0`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('取得訂單失敗');
-                    }
-                    return response.json();
-                })
+            fetchData(`https://springboot-mall-2.onrender.com/user/${userId}/orders?limit=10&offset=0`)
                 .then(data => {
                     const orderList = document.getElementById('orderList');
                     orderList.innerHTML = '<h2>我的訂單</h2>';
                     if (data.results.length === 0) {
                         orderList.innerHTML += '<p>您目前沒有任何訂單</p>';
                     } else {
+                        const fragment = document.createDocumentFragment();
                         data.results.forEach(order => {
                             const orderDiv = document.createElement('div');
                             orderDiv.className = 'order';
@@ -499,8 +271,9 @@
                                     `).join('')}
                                 </div>
                             `;
-                            orderList.appendChild(orderDiv);
+                            fragment.appendChild(orderDiv);
                         });
+                        orderList.appendChild(fragment);
                     }
                 })
                 .catch(error => {
@@ -512,261 +285,22 @@
         // 顯示/隱藏訂單明細
         function toggleOrderDetails(orderId) {
             const detailsDiv = document.getElementById(`orderDetails-${orderId}`);
-            if (detailsDiv.style.display === 'none') {
-                detailsDiv.style.display = 'block';
-            } else {
-                detailsDiv.style.display = 'none';
-            }
+            detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
         }
 
         // 頁面載入完成後取得商品列表
         window.onload = fetchProducts;
-    </script>
-</body>
-</html>
-<body>
-    <header>
-        <h1>Jerry-mall</h1>
-    </header>
 
-    <div class="container">
-        <!-- 註冊表單 -->
-        <form id="registerForm">
-            <h2>註冊</h2>
-            <input type="email" id="registerEmail" placeholder="電子郵件" required>
-            <input type="password" id="registerPassword" placeholder="密碼" required>
-            <button type="submit">註冊</button>
-            <div class="success" id="registerSuccess"></div>
-            <div class="error" id="registerError"></div>
-        </form>
-
-        <!-- 登入表單 -->
-        <form id="loginForm">
-            <h2>登入</h2>
-            <input type="email" id="loginEmail" placeholder="電子郵件" required>
-            <input type="password" id="loginPassword" placeholder="密碼" required>
-            <button type="submit">登入</button>
-            <div class="success" id="loginSuccess"></div>
-            <div class="error" id="loginError"></div>
-        </form>
-
-        <!-- 查看訂單按鈕 (初始隱藏) -->
-        <button id="viewOrdersBtn" style="display: none;">查看我的訂單</button>
-
-        <!-- 訂單列表 -->
-        <div class="order-list" id="orderList"></div>
-
-        <!-- 新增商品 -->
-        <form id="productForm">
-            <h2>新增商品</h2>
-            <input type="text" id="productName" placeholder="商品名稱" required>
-            <select id="category" required>
-                <option value="" disabled selected>選擇類別</option>
-                <option value="ELECTRONICS">電子產品</option>
-                <option value="CLOTHING">服飾</option>
-                <option value="FOOD">食品</option>
-            </select>
-            <input type="text" id="imageUrl" placeholder="圖片網址" required>
-            <input type="number" id="price" placeholder="價格" required>
-            <input type="number" id="stock" placeholder="庫存" required>
-            <textarea id="description" placeholder="描述"></textarea>
-            <button type="submit">新增商品</button>
-            <div class="error" id="productError"></div>
-        </form>
-
-        <!-- 商品列表 -->
-        <div class="product-list" id="productList"></div>
-
-        <!-- 分頁 -->
-        <div class="pagination">
-            <button id="prevPage" disabled>上一頁</button>
-            <button id="nextPage" disabled>下一頁</button>
-        </div>
-
-        <!-- 新增商家功能按鈕 -->
-        <button id="merchantBtn" style="display: none;">商家功能</button>
-    </div>
-
-    <!-- 商家功能模態框 -->
-    <div id="merchantModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>商家功能</h2>
-            <form id="merchantProductForm">
-                <input type="hidden" id="productId">
-                <input type="text" id="merchantProductName" placeholder="商品名稱" required>
-                <select id="merchantCategory" required>
-                    <option value="" disabled selected>選擇類別</option>
-                    <option value="ELECTRONICS">電子產品</option>
-                    <option value="CLOTHING">服飾</option>
-                    <option value="FOOD">食品</option>
-                </select>
-                <input type="text" id="merchantImageUrl" placeholder="圖片網址" required>
-                <input type="number" id="merchantPrice" placeholder="價格" required>
-                <input type="number" id="merchantStock" placeholder="庫存" required>
-                <textarea id="merchantDescription" placeholder="描述"></textarea>
-                <button type="submit">保存商品</button>
-            </form>
-            <div id="merchantProductList"></div>
-        </div>
-    </div>
-
-    <script>
-        let currentPage = 0;
-        const pageSize = 5;
-        let currentUser = null; // 當前登入的使用者資料
-
-        // 註冊功能
-        document.getElementById('registerForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value.trim();
-
-            fetch('https://springboot-mall-2.onrender.com/User/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw err; });
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('registerSuccess').textContent = '註冊成功';
-                document.getElementById('registerError').textContent = '';
-            })
-            .catch(error => {
-                console.error('Registration error:', error);
-                if (error.message === 'EMAIL_ALREADY_EXISTS') {
-                    document.getElementById('registerError').textContent = '該電子郵件已被註冊';
-                } else if (error.message) {
-                    document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
-                } else {
-                    document.getElementById('registerError').textContent = '註冊失敗，請稍後再試';
-                }
-                document.getElementById('registerSuccess').textContent = '';
-            });
+        // 添加事件委託以处理加入购物车事件
+        document.getElementById('productList').addEventListener('click', function (e) {
+            if (e.target.classList.contains('add-to-cart')) {
+                const productId = e.target.getAttribute('data-product-id');
+                const quantity = document.getElementById(`quantity-${productId}`).value;
+                addToOrder(productId, quantity);
+            }
         });
 
-        // 登入功能
-        document.getElementById('loginForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-
-            fetch('https://springboot-mall-2.onrender.com/User/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('登入失敗，請檢查您的帳號密碼是否正確');
-                }
-                return response.json();
-            })
-            .then(data => {
-                currentUser = data; // 儲存當前登入的使用者資料
-                document.getElementById('loginSuccess').textContent = '登入成功';
-                document.getElementById('loginError').textContent = '';
-                document.getElementById('viewOrdersBtn').style.display = 'block'; // 顯示查看訂單按鈕
-                document.getElementById('merchantBtn').style.display = 'block'; // 顯示商家功能按鈕
-                document.getElementById('loginForm').style.display = 'none'; // 隱藏登入表單
-                document.getElementById('registerForm').style.display = 'none'; // 隱藏註冊表單
-                fetchProducts(); // 登入成功後取得商品列表
-            })
-            .catch(error => {
-                console.error('Login error:', error);
-                document.getElementById('loginError').textContent = error.message;
-                document.getElementById('loginSuccess').textContent = '';
-            });
-        });
-
-        // 新增商品
-        document.getElementById('productForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-
-            const productData = {
-                productName: document.getElementById('productName').value.trim(),
-                category: document.getElementById('category').value,
-                imageUrl: document.getElementById('imageUrl').value.trim(),
-                price: parseInt(document.getElementById('price').value),
-                stock: parseInt(document.getElementById('stock').value),
-                description: document.getElementById('description').value.trim()
-            };
-
-            fetch('https://springboot-mall-2.onrender.com/products', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(productData)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('新增商品失敗');
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('productError').textContent = '';
-                fetchProducts(); // 重新取得商品列表
-                document.getElementById('productForm').reset();
-            })
-            .catch(error => {
-                document.getElementById('productError').textContent = error.message;
-            });
-        });
-
-        // 取得商品列表
-        function fetchProducts() {
-            fetch(`https://springboot-mall-2.onrender.com/products?limit=${pageSize}&offset=${currentPage * pageSize}`)
-                .then(response => response.json())
-                .then(data => {
-                    const productList = document.getElementById('productList');
-                    productList.innerHTML = '';
-                    data.results.forEach(product => {
-                        const productDiv = document.createElement('div');
-                        productDiv.className = 'product';
-                        productDiv.innerHTML = `
-                            <img src="${product.imageUrl}" alt="${product.productName}">
-                            <div>
-                                <h3>${product.productName}</h3>
-                                <p>類別: ${product.category}</p>
-                                <p>價格: $${product.price}</p>
-                                <p>庫存: ${product.stock}</p>
-                                <p>描述: ${product.description}</p>
-                                ${currentUser ? `
-                                    <div class="product-actions">
-                                        <select id="quantity-${product.productId}">
-                                            ${Array.from({length: 10}, (_, i) => i + 1).map(num => `<option value="${num}">${num}</option>`).join('')}
-                                        </select>
-                                        <button class="add-to-cart" data-product-id="${product.productId}">加入購物車</button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
-                        productList.appendChild(productDiv);
-                    });
-
-                    // 添加事件委託
-                    productList.addEventListener('click', function(e) {
-                        if (e.target.classList.contains('add-to-cart')) {
-                            const productId = e.target.getAttribute('data-product-id');
-                            const quantity = document.getElementById(`quantity-${productId}`).value;
-                            addToOrder(productId, quantity);
-                        }
-                    });
-
-                    updatePaginationButtons(data.total);
-                });
-        }
-
-        // 分頁按鈕事件處理
+        // 分页按钮事件
         document.getElementById('prevPage').addEventListener('click', () => {
             if (currentPage > 0) {
                 currentPage--;
@@ -778,109 +312,6 @@
             currentPage++;
             fetchProducts();
         });
-
-        // 更新分頁按鈕狀態
-        function updatePaginationButtons(totalCount) {
-            document.getElementById('prevPage').disabled = currentPage === 0;
-            document.getElementById('nextPage').disabled = (currentPage + 1) * pageSize >= totalCount;
-        }
-
-        // 添加 addToOrder 函數
-        function addToOrder(productId, quantity) {
-            const orderData = {
-                buyItemList: [{
-                    productId: parseInt(productId),
-                    quantity: parseInt(quantity)
-                }]
-            };
-
-            fetch(`https://springboot-mall-2.onrender.com/order/${currentUser.userId}/orders`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(orderData)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('加入購物車失敗');
-                return response.json();
-            })
-            .then(data => {
-                alert('已成功加入購物車');
-            })
-            .catch(error => {
-                alert('加入購物車失敗: ' + error.message);
-            });
-        }
-
-        // 查看訂單按鈕點擊事件
-        document.getElementById('viewOrdersBtn').addEventListener('click', () => {
-            if (currentUser) {
-                fetchUserOrders(currentUser.userId);
-            } else {
-                alert('請先登入');
-            }
-        });
-
-        // 取得使用者訂單
-        function fetchUserOrders(userId) {
-            fetch(`https://springboot-mall-2.onrender.com/user/${userId}/orders?limit=10&offset=0`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('取得訂單失敗');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const orderList = document.getElementById('orderList');
-                    orderList.innerHTML = '<h2>我的訂單</h2>';
-                    if (data.results.length === 0) {
-                        orderList.innerHTML += '<p>您目前沒有任何訂單</p>';
-                    } else {
-                        data.results.forEach(order => {
-                            const orderDiv = document.createElement('div');
-                            orderDiv.className = 'order';
-                            orderDiv.innerHTML = `
-                                <p>訂單ID: ${order.orderId}</p>
-                                <p>訂單總金額: $${order.totalAmount}</p>
-                                <p>下單時間: ${new Date(order.createdDate).toLocaleString()}</p>
-                                <button onclick="toggleOrderDetails(${order.orderId})">顯示訂單明細</button>
-                                <div id="orderDetails-${order.orderId}" class="order-details" style="display: none;">
-                                    <h3>訂單明細</h3>
-                                    ${order.orderItemsList.map(item => `
-                                        <div class="order-item">
-                                            <p>商品名稱: ${item.productName}</p>
-                                            <p>數量: ${item.quantity}</p>
-                                            <p>小計: $${item.amount}</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            `;
-                            orderList.appendChild(orderDiv);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching orders:', error);
-                    alert('取得訂單失敗: ' + error.message);
-                });
-        }
-
-        // 顯示/隱藏訂單明細
-        function toggleOrderDetails(orderId) {
-            const detailsDiv = document.getElementById(`orderDetails-${orderId}`);
-            if (detailsDiv.style.display === 'none') {
-                detailsDiv.style.display = 'block';
-            } else {
-                detailsDiv.style.display = 'none';
-            }
-        }
-
-        // 頁面載入完成後取得商品列表
-        window.onload = fetchProducts;
     </script>
 </body>
 </html>
-
-
-
