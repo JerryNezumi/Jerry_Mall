@@ -365,7 +365,11 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('登入失敗，請檢查您的帳號密碼是否正確');
+                    if (response.status === 400) {
+                        throw new Error('帳號或密碼錯誤');
+                    } else {
+                        throw new Error('登入失敗，請稍後再試');
+                    }
                 }
                 return response.json();
             })
@@ -810,7 +814,7 @@
             .catch(error => {
                 console.error('Registration error:', error);
                 if (error.message === 'EMAIL_ALREADY_EXISTS') {
-                    document.getElementById('registerError').textContent = '該電子郵件已被註冊';
+                    document.getElementById('registerError').textContent = '註冊失敗，該帳號已註冊';
                 } else if (error.message) {
                     document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
                 } else {
