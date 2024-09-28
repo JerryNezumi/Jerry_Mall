@@ -823,6 +823,111 @@
                 document.getElementById('registerSuccess').textContent = '';
             });
         });
+
+        // 在商品列表上方添加搜索表單
+        <div id="searchForm" style="display: none;">
+            <select id="categoryFilter">
+                <option value="">所有類別</option>
+                <option value="BOOK">書籍</option>
+                <option value="CAR">汽車</option>
+                <option value="FOOD">食品</option>
+            </select>
+            <input type="text" id="searchKeyword" placeholder="搜索商品">
+            <button id="searchButton">搜索</button>
+        </div>
+
+        // 修改登入功能，在登入成功後顯示搜索表單
+        document.getElementById('loginForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            fetch('https://springboot-mall-2.onrender.com/User/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        throw new Error('帳號或密碼錯誤');
+                    } else {
+                        throw new Error('登入失敗，請稍後再試');
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentUser = data;
+                document.getElementById('loginSuccess').textContent = '登入成功';
+                document.getElementById('loginError').textContent = '';
+                document.getElementById('viewOrdersBtn').style.display = 'block';
+                document.getElementById('merchantBtn').style.display = 'block';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('productList').style.display = 'block';
+                document.getElementById('activateBtn').style.display = 'none'; // 隱藏啟動按鈕
+                document.getElementById('searchForm').style.display = 'block'; // 顯示搜索表單
+                fetchProducts();
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                document.getElementById('loginError').textContent = error.message;
+                document.getElementById('loginSuccess').textContent = '';
+            });
+        });
+
+        // 修改取得商品列表函數
+        function fetchProducts(category = '', search = '') {
+            const url = new URL('https://springboot-mall-2.onrender.com/products');
+            url.searchParams.append('limit', pageSize);
+            url.searchParams.append('offset', (currentPage - 1) * pageSize);
+            if (category) url.searchParams.append('category', category);
+            if (search) url.searchParams.append('search', search);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const productList = document.getElementById('productList');
+                    productList.innerHTML = '';
+                    data.results.forEach(product => {
+                        const productDiv = document.createElement('div');
+                        productDiv.className = 'product';
+                        productDiv.innerHTML = `
+                            <img src="${product.imageUrl}" alt="${product.productName}">
+                            <div>
+                                <h3>${product.productName}</h3>
+                                <p>類別: ${product.category}</p>
+                                <p>價格: $${product.price}</p>
+                                <p>庫存: ${product.stock}</p>
+                                <p>描述: ${product.description}</p>
+                                ${currentUser ? `
+                                    <div class="product-actions">
+                                        <select id="quantity-${product.productId}">
+                                            ${Array.from({length: 10}, (_, i) => i + 1).map(num => `<option value="${num}">${num}</option>`).join('')}
+                                        </select>
+                                        <button class="add-to-cart" data-product-id="${product.productId}">加入購物車</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                        productList.appendChild(productDiv);
+                    });
+
+                    totalProducts = data.total;
+                    updatePagination();
+                });
+        }
+
+        // 添加搜索功能
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const category = document.getElementById('categoryFilter').value;
+            const search = document.getElementById('searchKeyword').value;
+            currentPage = 1; // 重置頁碼
+            fetchProducts(category, search);
+        });
     </script>
 </body>
 </html>
