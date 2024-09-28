@@ -621,10 +621,15 @@
                 body: JSON.stringify(productData)
             })
             .then(response => {
-                if (!response.ok) throw new Error('新增商品失敗');
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || '新增商品失敗');
+                    });
+                }
                 return response.json();
             })
             .then(data => {
+                console.log('新增商品成功:', data);
                 alert('商品已成功新增');
                 document.getElementById('addProductForm').reset();
                 document.getElementById('addProductModal').style.display = 'none';
