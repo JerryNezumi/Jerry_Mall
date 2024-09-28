@@ -283,13 +283,13 @@
                 document.getElementById('registerError').textContent = '';
             })
             .catch(error => {
-                console.error('Registration error:', error); // 處理註冊錯誤
+                console.error('Registration error:', error);
                 if (error.message === 'EMAIL_ALREADY_EXISTS') {
                     document.getElementById('registerError').textContent = '該電子郵件已被註冊';
                 } else if (error.message) {
                     document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
                 } else {
-                    document.getElementById('registerError').textContent = '註冊失敗，請檢查您的電子郵件是否已被註冊';
+                    document.getElementById('registerError').textContent = '註冊失敗，請稍後再試';
                 }
                 document.getElementById('registerSuccess').textContent = '';
             });
@@ -326,7 +326,7 @@
             })
             .catch(error => {
                 console.error('Login error:', error);
-                document.getElementById('loginError').textContent = '登入失敗，請檢查您的帳號密碼是否正確';
+                document.getElementById('loginError').textContent = error.message;
                 document.getElementById('loginSuccess').textContent = '';
             });
         });
@@ -384,161 +384,26 @@
                                 <p>庫存: ${product.stock}</p>
                                 <p>描述: ${product.description}</p>
                                 ${currentUser ? `
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jerrymall</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0; /* 修改這裡：將背景色改為淺灰色 */
+                                    <div class="product-actions">
+                                        <select class="quantity-select">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                        <button class="add-to-cart" data-product-id="${product.id}">加入購物車</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                        productList.appendChild(productDiv);
+                    });
+                });
         }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        input, select, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .product {
-            display: flex;
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .product img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 20px;
-            border-radius: 8px;
-        }
-        .error, .success {
-            margin-top: 10px;
-            color: red;
-            font-size: 14px;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .pagination button {
-            margin: 0 5px;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-        }
-        .pagination button:disabled {
-            background-color: #ddd;
-            cursor: not-allowed;
-        }
-        .order-list {
-            margin-top: 20px;
-        }
-        .product-actions {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .product-actions select {
-            width: auto;
-            margin-right: 10px;
-        }
-        .product-actions button {
-            width: auto;
-        }
-        #viewOrdersBtn {
-            display: none;
-            margin-top: 20px;
-        }
-        .order-details {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-        }
-        .order-item {
-            margin-bottom: 5px;
-        }
-
-        /* 新增的樣式 */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        #merchantBtn {
-            display: none; /* 初始隱藏 */
-            margin-top: 20px;
-        }
-    </style>
-</head>
+    </script>
+</body>
+</html>
 <body>
     <header>
         <h1>商品管理系統</h1>
@@ -655,13 +520,13 @@
                 document.getElementById('registerError').textContent = '';
             })
             .catch(error => {
-                console.error('Registration error:', error); // 處理註冊錯誤
+                console.error('Registration error:', error);
                 if (error.message === 'EMAIL_ALREADY_EXISTS') {
                     document.getElementById('registerError').textContent = '該電子郵件已被註冊';
                 } else if (error.message) {
                     document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
                 } else {
-                    document.getElementById('registerError').textContent = '註冊失敗，請檢查您的電子郵件是否已被註冊';
+                    document.getElementById('registerError').textContent = '註冊失敗，請稍後再試';
                 }
                 document.getElementById('registerSuccess').textContent = '';
             });
@@ -698,7 +563,7 @@
             })
             .catch(error => {
                 console.error('Login error:', error);
-                document.getElementById('loginError').textContent = '登入失敗，請檢查您的帳號密碼是否正確';
+                document.getElementById('loginError').textContent = error.message;
                 document.getElementById('loginSuccess').textContent = '';
             });
         });
