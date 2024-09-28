@@ -782,6 +782,43 @@
                     alert('啟動失敗，請稍後再試');
                 });
         });
+
+        // 註冊功能
+        document.getElementById('registerForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+
+            fetch('https://springboot-mall-2.onrender.com/User/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('registerSuccess').textContent = '註冊成功';
+                document.getElementById('registerError').textContent = '';
+                document.getElementById('registerForm').reset();
+            })
+            .catch(error => {
+                console.error('Registration error:', error);
+                if (error.message === 'EMAIL_ALREADY_EXISTS') {
+                    document.getElementById('registerError').textContent = '該電子郵件已被註冊';
+                } else if (error.message) {
+                    document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
+                } else {
+                    document.getElementById('registerError').textContent = '註冊失敗，請稍後再試';
+                }
+                document.getElementById('registerSuccess').textContent = '';
+            });
+        });
     </script>
 </body>
 </html>
