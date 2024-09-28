@@ -383,6 +383,7 @@
                 document.getElementById('registerForm').style.display = 'none';
                 document.getElementById('productList').style.display = 'block';
                 document.getElementById('activateBtn').style.display = 'none'; // 隱藏啟動按鈕
+                document.getElementById('searchForm').style.display = 'block'; // 顯示搜索表單
                 fetchProducts();
             })
             .catch(error => {
@@ -393,8 +394,14 @@
         });
 
         // 修改取得商品列表函數
-        function fetchProducts() {
-            fetch(`https://springboot-mall-2.onrender.com/products?limit=${pageSize}&offset=${(currentPage - 1) * pageSize}`)
+        function fetchProducts(category = '', search = '') {
+            const url = new URL('https://springboot-mall-2.onrender.com/products');
+            url.searchParams.append('limit', pageSize);
+            url.searchParams.append('offset', (currentPage - 1) * pageSize);
+            if (category) url.searchParams.append('category', category);
+            if (search) url.searchParams.append('search', search);
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     const productList = document.getElementById('productList');
