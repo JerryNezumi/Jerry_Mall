@@ -71,13 +71,13 @@
         .pagination button, #merchantPagination button {
             margin: 0 2px;
             padding: 0;
-            font-size: 20px; /* 增大字體大小 */
+            font-size: 32px; /* 增大字體大小到 32px */
             background-color: #f0f0f0;
             border: 1px solid #ddd;
             border-radius: 2px;
             cursor: pointer;
-            width: 30px; /* 設置固定寬度 */
-            height: 30px; /* 設置固定高度 */
+            width: 50px; /* 增加寬度以適應更大的字體 */
+            height: 50px; /* 增加高度以適應更大的字體 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -249,6 +249,9 @@
     </header>
 
     <div class="container">
+        <!-- 在 <div class="container"> 的開始處添加以下代碼 -->
+        <button id="activateBtn" style="margin-bottom: 20px;">啟動</button>
+
         <!-- 註冊表單 -->
         <form id="registerForm">
             <h2>註冊</h2>
@@ -375,6 +378,7 @@
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('registerForm').style.display = 'none';
                 document.getElementById('productList').style.display = 'block';
+                document.getElementById('activateBtn').style.display = 'none'; // 隱藏啟動按鈕
                 fetchProducts();
             })
             .catch(error => {
@@ -764,6 +768,19 @@
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
+        });
+
+        // 添加啟動按鈕的事件監聽器
+        document.getElementById('activateBtn').addEventListener('click', () => {
+            fetch('https://springboot-mall-2.onrender.com/activate')
+                .then(response => response.text())
+                .then(data => {
+                    alert(data); // 顯示後端返回的消息
+                })
+                .catch(error => {
+                    console.error('Activation error:', error);
+                    alert('啟動失敗，請稍後再試');
+                });
         });
     </script>
 </body>
