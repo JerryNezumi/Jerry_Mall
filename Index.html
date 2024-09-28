@@ -69,13 +69,16 @@
             margin-top: 10px;
         }
         .pagination button, #merchantPagination button {
-            margin: 0 1px;  // 減少按鈕之間的間距
-            padding: 2px 4px;  // 縮小按鈕的內部填充
-            font-size: 8px;  // 縮小字體大小
+            margin: 0 1px;
+            padding: 1px 3px;
+            font-size: 12px;
             background-color: #f0f0f0;
             border: 1px solid #ddd;
-            border-radius: 2px;  // 減小邊角半徑
+            border-radius: 2px;
             cursor: pointer;
+            min-width: 20px;
+            height: 20px;
+            line-height: 1;
         }
         .pagination button:disabled, #merchantPagination button:disabled {
             background-color: #4da6ff;
@@ -185,13 +188,16 @@
         }
 
         #merchantPagination button {
-            margin: 0 2px;
-            padding: 3px 6px;
-            font-size: 10px;
+            margin: 0 1px;
+            padding: 1px 3px;
+            font-size: 12px;
             background-color: #f0f0f0;
             border: 1px solid #ddd;
-            border-radius: 3px;
+            border-radius: 2px;
             cursor: pointer;
+            min-width: 20px;
+            height: 20px;
+            line-height: 1;
         }
 
         #merchantPagination button:disabled {
