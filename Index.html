@@ -12,7 +12,7 @@
             background-color: #f0f0f0; /* 整個頁面的背景色 */
         }
         header {
-            background-color: #4CAF50;
+            background-color: #4da6ff; /* 改為和按鈕一樣的顏色 */
             color: white;
             text-align: center;
             padding: 10px 0;
@@ -165,6 +165,10 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
+
+        #productForm {
+            display: none; /* 初始隱藏新增商品表單 */
+        }
     </style>
 </head>
 <body>
@@ -284,8 +288,8 @@
                 document.getElementById('merchantBtn').style.display = 'block';
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('registerForm').style.display = 'none';
-                document.getElementById('productList').style.display = 'block'; // 顯示商品列表
-                fetchProducts(); // 登入成功後取得商品列表
+                document.getElementById('productList').style.display = 'block';
+                fetchProducts();
             })
             .catch(error => {
                 console.error('Login error:', error);
@@ -477,6 +481,24 @@
                 detailsDiv.style.display = 'none';
             }
         }
+
+        // 添加商家功能按鈕的事件監聽器
+        document.getElementById('merchantBtn').addEventListener('click', () => {
+            document.getElementById('productForm').style.display = 'block';
+            document.getElementById('merchantModal').style.display = 'block';
+        });
+
+        // 添加關閉商家功能模態框的邏輯
+        document.querySelector('.close').addEventListener('click', () => {
+            document.getElementById('merchantModal').style.display = 'none';
+        });
+
+        // 點擊模態框外部時關閉
+        window.addEventListener('click', (event) => {
+            if (event.target == document.getElementById('merchantModal')) {
+                document.getElementById('merchantModal').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
