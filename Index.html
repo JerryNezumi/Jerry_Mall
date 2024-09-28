@@ -249,7 +249,6 @@
     </header>
 
     <div class="container">
-        <!-- 在 <div class="container"> 的開始處添加以下代碼 -->
         <button id="activateBtn" style="margin-bottom: 20px;">啟動</button>
 
         <!-- 註冊表單 -->
@@ -271,6 +270,18 @@
             <div class="success" id="loginSuccess"></div>
             <div class="error" id="loginError"></div>
         </form>
+
+        <!-- 搜索表單 -->
+        <div id="searchForm" style="display: none;">
+            <select id="categoryFilter">
+                <option value="">所有類別</option>
+                <option value="BOOK">書籍</option>
+                <option value="CAR">汽車</option>
+                <option value="FOOD">食品</option>
+            </select>
+            <input type="text" id="searchKeyword" placeholder="搜索商品">
+            <button id="searchButton">搜索</button>
+        </div>
 
         <!-- 查看訂單按鈕 (初始隱藏) -->
         <button id="viewOrdersBtn" style="display: none;">查看我的訂單</button>
