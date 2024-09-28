@@ -385,21 +385,138 @@
                                 <p>描述: ${product.description}</p>
                                 ${currentUser ? `
                                     <div class="product-actions">
-                                        <select class="quantity-select">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
+                                        <select id="quantity-${product.productId}">
+                                            ${Array.from({length: 10}, (_, i) => i + 1).map(num => `<option value="${num}">${num}</option>`).join('')}
                                         </select>
-                                        <button class="add-to-cart" data-product-id="${product.id}">加入購物車</button>
+                                        <button class="add-to-cart" data-product-id="${product.productId}">加入購物車</button>
                                     </div>
                                 ` : ''}
                             </div>
                         `;
                         productList.appendChild(productDiv);
                     });
+
+                    // 添加事件委託
+                    productList.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('add-to-cart')) {
+                            const productId = e.target.getAttribute('data-product-id');
+                            const quantity = document.getElementById(`quantity-${productId}`).value;
+                            addToOrder(productId, quantity);
+                        }
+                    });
+
+                    updatePaginationButtons(data.total);
                 });
+        }
+
+        // 分頁按鈕事件處理
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                fetchProducts();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            currentPage++;
+            fetchProducts();
+        });
+
+        // 更新分頁按鈕狀態
+        function updatePaginationButtons(totalCount) {
+            document.getElementById('prevPage').disabled = currentPage === 0;
+            document.getElementById('nextPage').disabled = (currentPage + 1) * pageSize >= totalCount;
+        }
+
+        // 添加 addToOrder 函數
+        function addToOrder(productId, quantity) {
+            const orderData = {
+                buyItemList: [{
+                    productId: parseInt(productId),
+                    quantity: parseInt(quantity)
+                }]
+            };
+
+            fetch(`https://springboot-mall-2.onrender.com/order/${currentUser.userId}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('加入購物車失敗');
+                return response.json();
+            })
+            .then(data => {
+                alert('已成功加入購物車');
+            })
+            .catch(error => {
+                alert('加入購物車失敗: ' + error.message);
+            });
+        }
+
+        // 查看訂單按鈕點擊事件
+        document.getElementById('viewOrdersBtn').addEventListener('click', () => {
+            if (currentUser) {
+                fetchUserOrders(currentUser.userId);
+            } else {
+                alert('請先登入');
+            }
+        });
+
+        // 取得使用者訂單
+        function fetchUserOrders(userId) {
+            fetch(`https://springboot-mall-2.onrender.com/user/${userId}/orders?limit=10&offset=0`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('取得訂單失敗');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const orderList = document.getElementById('orderList');
+                    orderList.innerHTML = '<h2>我的訂單</h2>';
+                    if (data.results.length === 0) {
+                        orderList.innerHTML += '<p>您目前沒有任何訂單</p>';
+                    } else {
+                        data.results.forEach(order => {
+                            const orderDiv = document.createElement('div');
+                            orderDiv.className = 'order';
+                            orderDiv.innerHTML = `
+                                <p>訂單ID: ${order.orderId}</p>
+                                <p>訂單總金額: $${order.totalAmount}</p>
+                                <p>下單時間: ${new Date(order.createdDate).toLocaleString()}</p>
+                                <button onclick="toggleOrderDetails(${order.orderId})">顯示訂單明細</button>
+                                <div id="orderDetails-${order.orderId}" class="order-details" style="display: none;">
+                                    <h3>訂單明細</h3>
+                                    ${order.orderItemsList.map(item => `
+                                        <div class="order-item">
+                                            <p>商品名稱: ${item.productName}</p>
+                                            <p>數量: ${item.quantity}</p>
+                                            <p>小計: $${item.amount}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                            orderList.appendChild(orderDiv);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching orders:', error);
+                    alert('取得訂單失敗: ' + error.message);
+                });
+        }
+
+        // 顯示/隱藏訂單明細
+        function toggleOrderDetails(orderId) {
+            const detailsDiv = document.getElementById(`orderDetails-${orderId}`);
+            if (detailsDiv.style.display === 'none') {
+                detailsDiv.style.display = 'block';
+            } else {
+                detailsDiv.style.display = 'none';
+            }
         }
     </script>
 </body>
@@ -625,22 +742,25 @@
                                         <select id="quantity-${product.productId}">
                                             ${Array.from({length: 10}, (_, i) => i + 1).map(num => `<option value="${num}">${num}</option>`).join('')}
                                         </select>
-                                        <button onclick="addToOrder(${product.productId})">加入購物車</button>
+                                        <button class="add-to-cart" data-product-id="${product.productId}">加入購物車</button>
                                     </div>
                                 ` : ''}
                             </div>
                         `;
                         productList.appendChild(productDiv);
                     });
-                    updatePaginationButtons(data.totalCount);
-                })
-                .catch(error => console.error('Error fetching products:', error));
-        }
 
-        // 更新分頁按鈕狀態
-        function updatePaginationButtons(totalCount) {
-            document.getElementById('prevPage').disabled = currentPage === 0;
-            document.getElementById('nextPage').disabled = (currentPage + 1) * pageSize >= totalCount;
+                    // 添加事件委託
+                    productList.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('add-to-cart')) {
+                            const productId = e.target.getAttribute('data-product-id');
+                            const quantity = document.getElementById(`quantity-${productId}`).value;
+                            addToOrder(productId, quantity);
+                        }
+                    });
+
+                    updatePaginationButtons(data.total);
+                });
         }
 
         // 分頁按鈕事件處理
@@ -656,12 +776,17 @@
             fetchProducts();
         });
 
-        // 加入購物車
-        function addToOrder(productId) {
-            const quantity = document.getElementById(`quantity-${productId}`).value;
+        // 更新分頁按鈕狀態
+        function updatePaginationButtons(totalCount) {
+            document.getElementById('prevPage').disabled = currentPage === 0;
+            document.getElementById('nextPage').disabled = (currentPage + 1) * pageSize >= totalCount;
+        }
+
+        // 添加 addToOrder 函數
+        function addToOrder(productId, quantity) {
             const orderData = {
                 buyItemList: [{
-                    productId: productId,
+                    productId: parseInt(productId),
                     quantity: parseInt(quantity)
                 }]
             };
@@ -747,122 +872,6 @@
                 detailsDiv.style.display = 'none';
             }
         }
-
-        // 頁面載入完成後取得商品列表
-        window.onload = fetchProducts;
-
-        // 新增商家功能相關代碼
-        const merchantBtn = document.getElementById('merchantBtn');
-        const merchantModal = document.getElementById('merchantModal');
-        const closeBtn = document.getElementsByClassName('close')[0];
-
-        merchantBtn.onclick = function() {
-            merchantModal.style.display = "block";
-            fetchMerchantProducts();
-        }
-
-        closeBtn.onclick = function() {
-            merchantModal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == merchantModal) {
-                merchantModal.style.display = "none";
-            }
-        }
-
-        // 獲取商家商品列表
-        function fetchMerchantProducts() {
-            fetch('https://springboot-mall-2.onrender.com/products')
-                .then(response => response.json())
-                .then(data => {
-                    const merchantProductList = document.getElementById('merchantProductList');
-                    merchantProductList.innerHTML = '<h3>商品列表</h3>';
-                    data.results.forEach(product => {
-                        const productDiv = document.createElement('div');
-                        productDiv.innerHTML = `
-                            <p>${product.productName} - $${product.price}</p>
-                            <button onclick="editProduct(${product.productId})">編輯</button>
-                            <button onclick="deleteProduct(${product.productId})">刪除</button>
-                        `;
-                        merchantProductList.appendChild(productDiv);
-                    });
-                })
-                .catch(error => console.error('Error fetching merchant products:', error));
-        }
-
-        // 編輯商品
-        function editProduct(productId) {
-            fetch(`https://springboot-mall-2.onrender.com/products/${productId}`)
-                .then(response => response.json())
-                .then(product => {
-                    document.getElementById('productId').value = product.productId;
-                    document.getElementById('merchantProductName').value = product.productName;
-                    document.getElementById('merchantCategory').value = product.category;
-                    document.getElementById('merchantImageUrl').value = product.imageUrl;
-                    document.getElementById('merchantPrice').value = product.price;
-                    document.getElementById('merchantStock').value = product.stock;
-                    document.getElementById('merchantDescription').value = product.description;
-                })
-                .catch(error => console.error('Error fetching product details:', error));
-        }
-
-        // 刪除商品
-        function deleteProduct(productId) {
-            if (confirm('確定要刪除這個商品嗎？')) {
-                fetch(`https://springboot-mall-2.onrender.com/products/${productId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('商品已成功刪除');
-                        fetchMerchantProducts();
-                    } else {
-                        throw new Error('刪除商品失敗');
-                    }
-                })
-                .catch(error => console.error('Error deleting product:', error));
-            }
-        }
-
-        // 處理商家商品表單提交
-        document.getElementById('merchantProductForm').addEventListener('submit', (event) => {
-            event.preventDefault();
-            const productId = document.getElementById('productId').value;
-            const productData = {
-                productName: document.getElementById('merchantProductName').value.trim(),
-                category: document.getElementById('merchantCategory').value,
-                imageUrl: document.getElementById('merchantImageUrl').value.trim(),
-                price: parseInt(document.getElementById('merchantPrice').value),
-                stock: parseInt(document.getElementById('merchantStock').value),
-                description: document.getElementById('merchantDescription').value.trim()
-            };
-
-            const url = productId ? `https://springboot-mall-2.onrender.com/products/${productId}` : 'https://springboot-mall-2.onrender.com/products';
-            const method = productId ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(productData)
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('保存商品失敗');
-                return response.json();
-            })
-            .then(data => {
-                alert('商品已成功保存');
-                document.getElementById('merchantProductForm').reset();
-                document.getElementById('productId').value = '';
-                fetchMerchantProducts();
-            })
-            .catch(error => {
-                console.error('Error saving product:', error);
-                alert('保存商品失敗: ' + error.message);
-            });
-        });
     </script>
 </body>
 </html>
