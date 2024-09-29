@@ -296,7 +296,12 @@
         </div>
 
         <!-- 購物車區域 -->
-        <div id="cartSection" style="display: none;">
+        <div id="cartIcon" style="position: fixed; top: 10px; right: 10px; cursor: pointer;">
+            <img src="https://img.lovepik.com/free-png/20210918/lovepik-shopping-cart-png-image_400179806_wh300.png" alt="購物車" style="width: 50px; height: 50px;">
+            <span id="cartItemCount" style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; border-radius: 50%; padding: 2px 5px; font-size: 12px;">0</span>
+        </div>
+
+        <div id="cartSection" style="display: none; position: fixed; top: 70px; right: 10px; background-color: white; border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 300px; z-index: 1000;">
             <h2>購物車</h2>
             <div id="cartList"></div>
             <button onclick="placeOrder()">下單</button>
@@ -891,7 +896,8 @@
                 cart.push({ productId, quantity });
             }
             updateCartDisplay();
-            alert('成功加入購物車!'); // 添加提醒
+            updateCartItemCount();
+            alert('成功加入購物車!');
         }
 
         function updateCartDisplay() {
@@ -915,6 +921,7 @@
         function removeFromCart(productId) {
             cart = cart.filter(item => item.productId !== productId);
             updateCartDisplay();
+            updateCartItemCount();
         }
 
         function placeOrder() {
@@ -951,6 +958,23 @@
                 alert('下單失敗: ' + error.message);
             });
         }
+
+        // 更新購物車圖標的商品數量
+        function updateCartItemCount() {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cartItemCount').textContent = count;
+        }
+
+        // 添加購物車圖標的點擊事件
+        document.getElementById('cartIcon').addEventListener('click', () => {
+            const cartSection = document.getElementById('cartSection');
+            cartSection.style.display = cartSection.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // 在頁面加載完成後初始化購物車圖標
+        window.addEventListener('load', () => {
+            updateCartItemCount();
+        });
     </script>
 </body>
 </html>
