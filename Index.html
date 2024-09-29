@@ -71,13 +71,13 @@
         .pagination button, #merchantPagination button {
             margin: 0 2px;
             padding: 0;
-            font-size: 24px; /* 將字體大小增加到 24px (原來的 8px 的 3 倍) */
+            font-size: 72px; /* 將字體大小增加到 72px (24px 的 3 倍) */
             background-color: #a3896f;
             border: 1px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
-            width: 40px; /* 增加寬度以適應更大的字體 */
-            height: 40px; /* 增加高度以適應更大的字體 */
+            width: 120px; /* 增加寬度以適應更大的字體 */
+            height: 120px; /* 增加高度以適應更大的字體 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -240,6 +240,27 @@
 
         .pagination button:hover:not(:disabled), #merchantPagination button:hover:not(:disabled) {
             background-color: #b99d7f;
+        }
+
+        /* 放大搜索輸入框 */
+        #searchKeyword {
+            font-size: 24px; /* 增加字體大小 */
+            padding: 15px; /* 增加內邊距 */
+            height: 60px; /* 增加高度 */
+        }
+
+        /* 調整搜索按鈕大小以匹配輸入框 */
+        #searchButton {
+            font-size: 24px;
+            padding: 15px 30px;
+            height: 60px;
+        }
+
+        /* 調整類別選擇框大小以匹配輸入框 */
+        #categoryFilter {
+            font-size: 24px;
+            padding: 15px;
+            height: 60px;
         }
     </style>
 </head>
