@@ -304,6 +304,7 @@
         <div id="cartSection" style="display: none; position: fixed; top: 70px; right: 10px; background-color: white; border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 300px; z-index: 1000;">
             <h2>購物車</h2>
             <div id="cartList"></div>
+            <div id="cartTotal" style="font-weight: bold; margin-top: 10px;"></div>
             <button onclick="placeOrder()">下單</button>
         </div>
 
@@ -903,18 +904,26 @@
         function updateCartDisplay() {
             const cartList = document.getElementById('cartList');
             cartList.innerHTML = '';
-            cart.forEach(item => {
+            let totalAmount = 0;
+            
+            const promises = cart.map(item => 
                 fetch(`https://springboot-mall-2.onrender.com/products/${item.productId}`)
                     .then(response => response.json())
                     .then(product => {
                         const cartItem = document.createElement('div');
                         cartItem.innerHTML = `
                             <img src="${product.imageUrl}" alt="${product.productName}" style="width: 50px; height: 50px; object-fit: cover;">
-                            <p>商品名稱: ${product.productName}, 數量: ${item.quantity}</p>
+                            <p>商品名稱: ${product.productName}, 數量: ${item.quantity}, 單價: $${product.price}</p>
                             <button onclick="removeFromCart(${item.productId})">移除</button>
                         `;
                         cartList.appendChild(cartItem);
-                    });
+                        totalAmount += product.price * item.quantity;
+                        return totalAmount;
+                    })
+            );
+
+            Promise.all(promises).then(() => {
+                document.getElementById('cartTotal').textContent = `總金額: $${totalAmount}`;
             });
         }
 
