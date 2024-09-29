@@ -582,8 +582,16 @@
 
         // 查看訂單按鈕點擊事件
         document.getElementById('viewOrdersBtn').addEventListener('click', () => {
+            const orderList = document.getElementById('orderList');
             if (currentUser) {
-                fetchUserOrders(currentUser.userId);
+                if (orderList.style.display === 'none' || orderList.innerHTML === '') {
+                    fetchUserOrders(currentUser.userId);
+                    orderList.style.display = 'block';
+                    document.getElementById('viewOrdersBtn').textContent = '隱藏我的訂單';
+                } else {
+                    orderList.style.display = 'none';
+                    document.getElementById('viewOrdersBtn').textContent = '查看我的訂單';
+                }
             } else {
                 alert('請先登入');
             }
@@ -627,6 +635,7 @@
                             orderList.appendChild(orderDiv);
                         });
                     }
+                    orderList.style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Error fetching orders:', error);
