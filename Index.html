@@ -309,6 +309,13 @@
 
         <!-- 商家功能按鈕 -->
         <button id="merchantBtn" style="display: none;">商家功能</button>
+
+        <!-- 在 <div class="container"> 內添加購物車區域 -->
+        <div id="cartSection" style="display: none;">
+            <h2>購物車</h2>
+            <div id="cartList"></div>
+            <button onclick="placeOrder()">下單</button>
+        </div>
     </div>
 
     <!-- 商家功能模態框 -->
@@ -455,6 +462,7 @@
                 document.getElementById('productList').style.display = 'block';
                 document.getElementById('activateBtn').style.display = 'none';
                 document.getElementById('searchForm').style.display = 'block';
+                document.getElementById('cartSection').style.display = 'block';
                 fetchProducts();
             })
             .catch(error => {
@@ -493,7 +501,7 @@
                                         <select id="quantity-${product.productId}">
                                             ${Array.from({length: 10}, (_, i) => i + 1).map(num => `<option value="${num}">${num}</option>`).join('')}
                                         </select>
-                                        <button class="add-to-cart" data-product-id="${product.productId}">加入購物車</button>
+                                        <button onclick="addToCart(${product.productId}, parseInt(document.getElementById('quantity-${product.productId}').value))">加入購物車</button>
                                     </div>
                                 ` : ''}
                             </div>
@@ -860,6 +868,73 @@
             currentPage = 1; // 重置頁碼
             fetchProducts(category, search);
         });
+
+        // 在 script 標籤內添加以下代碼
+
+        let cart = [];
+
+        function addToCart(productId, quantity) {
+            const existingItem = cart.find(item => item.productId === productId);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({ productId, quantity });
+            }
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartList = document.getElementById('cartList');
+            cartList.innerHTML = '';
+            cart.forEach(item => {
+                const cartItem = document.createElement('div');
+                cartItem.innerHTML = `
+                    <p>商品ID: ${item.productId}, 數量: ${item.quantity}</p>
+                    <button onclick="removeFromCart(${item.productId})">移除</button>
+                `;
+                cartList.appendChild(cartItem);
+            });
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.productId !== productId);
+            updateCartDisplay();
+        }
+
+        function placeOrder() {
+            if (cart.length === 0) {
+                alert('購物車是空的');
+                return;
+            }
+            
+            const orderData = {
+                buyItemList: cart.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity
+                }))
+            };
+
+            fetch(`https://springboot-mall-2.onrender.com/order/${currentUser.userId}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('下單失敗');
+                return response.json();
+            })
+            .then(data => {
+                alert('訂單已成功建立');
+                cart = [];
+                updateCartDisplay();
+                fetchUserOrders(currentUser.userId);
+            })
+            .catch(error => {
+                alert('下單失敗: ' + error.message);
+            });
+        }
     </script>
 </body>
 </html>
