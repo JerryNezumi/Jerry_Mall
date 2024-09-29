@@ -389,7 +389,11 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(err => { throw err; });
+                    if (response.status === 400) {
+                        throw new Error('該email已經被註冊');
+                    } else {
+                        throw new Error('註冊失敗，請稍後再試');
+                    }
                 }
                 return response.json();
             })
@@ -400,13 +404,7 @@
             })
             .catch(error => {
                 console.error('Registration error:', error);
-                if (error.message === 'EMAIL_ALREADY_EXISTS') {
-                    document.getElementById('registerError').textContent = '註冊失敗，該帳號已註冊';
-                } else if (error.message) {
-                    document.getElementById('registerError').textContent = '註冊失敗: ' + error.message;
-                } else {
-                    document.getElementById('registerError').textContent = '註冊失敗，請稍後再試';
-                }
+                document.getElementById('registerError').textContent = error.message;
                 document.getElementById('registerSuccess').textContent = '';
             });
         });
