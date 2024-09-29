@@ -258,7 +258,7 @@
     </header>
 
     <div class="container">
-        <p style="color: #a3896f; font-weight: bold; margin-bottom: 10px; text-align: center;">
+        <p id="activateMessage" style="color: #a3896f; font-weight: bold; margin-bottom: 10px; text-align: center;">
             因後端API架設於免費平台，請先按下啟動鍵後，稍待1~2分鐘，待跳出啟動成功視窗後，方可正常進行註冊登入，謝謝
         </p>
         <button id="activateBtn" style="margin-bottom: 20px;">啟動</button>
@@ -295,6 +295,13 @@
             <button id="searchButton">搜索</button>
         </div>
 
+        <!-- 購物車區域 -->
+        <div id="cartSection" style="display: none;">
+            <h2>購物車</h2>
+            <div id="cartList"></div>
+            <button onclick="placeOrder()">下單</button>
+        </div>
+
         <!-- 查看訂單按鈕 (初始隱藏) -->
         <button id="viewOrdersBtn" style="display: none;">查看我的訂單</button>
 
@@ -309,13 +316,6 @@
 
         <!-- 商家功能按鈕 -->
         <button id="merchantBtn" style="display: none;">商家功能</button>
-
-        <!-- 在 <div class="container"> 內添加購物車區域 -->
-        <div id="cartSection" style="display: none;">
-            <h2>購物車</h2>
-            <div id="cartList"></div>
-            <button onclick="placeOrder()">下單</button>
-        </div>
     </div>
 
     <!-- 商家功能模態框 -->
@@ -463,6 +463,7 @@
                 document.getElementById('activateBtn').style.display = 'none';
                 document.getElementById('searchForm').style.display = 'block';
                 document.getElementById('cartSection').style.display = 'block';
+                document.getElementById('activateMessage').style.display = 'none';
                 fetchProducts();
             })
             .catch(error => {
@@ -881,18 +882,24 @@
                 cart.push({ productId, quantity });
             }
             updateCartDisplay();
+            alert('成功加入購物車!'); // 添加提醒
         }
 
         function updateCartDisplay() {
             const cartList = document.getElementById('cartList');
             cartList.innerHTML = '';
             cart.forEach(item => {
-                const cartItem = document.createElement('div');
-                cartItem.innerHTML = `
-                    <p>商品ID: ${item.productId}, 數量: ${item.quantity}</p>
-                    <button onclick="removeFromCart(${item.productId})">移除</button>
-                `;
-                cartList.appendChild(cartItem);
+                fetch(`https://springboot-mall-2.onrender.com/products/${item.productId}`)
+                    .then(response => response.json())
+                    .then(product => {
+                        const cartItem = document.createElement('div');
+                        cartItem.innerHTML = `
+                            <img src="${product.imageUrl}" alt="${product.productName}" style="width: 50px; height: 50px; object-fit: cover;">
+                            <p>商品名稱: ${product.productName}, 數量: ${item.quantity}</p>
+                            <button onclick="removeFromCart(${item.productId})">移除</button>
+                        `;
+                        cartList.appendChild(cartItem);
+                    });
             });
         }
 
