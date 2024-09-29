@@ -580,7 +580,7 @@
             }
         });
 
-        // 取得使用者訂單
+        // 修改取得使用者訂單函數
         function fetchUserOrders(userId) {
             fetch(`https://springboot-mall-2.onrender.com/user/${userId}/orders?limit=10&offset=0`)
                 .then(response => {
@@ -607,6 +607,7 @@
                                     <h3>訂單明細</h3>
                                     ${order.orderItemsList.map(item => `
                                         <div class="order-item">
+                                            <img src="${item.imageUrl}" alt="${item.productName}" style="width: 50px; height: 50px; object-fit: cover;">
                                             <p>商品名稱: ${item.productName}</p>
                                             <p>數量: ${item.quantity}</p>
                                             <p>小計: $${item.amount}</p>
