@@ -248,6 +248,33 @@
             padding: 10px;
             height: auto;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #a3896f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled {
+            background-color: #8a7259;
+            cursor: default;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background-color: #b99d7f;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 </head>
@@ -537,12 +564,13 @@
                 });
         }
 
-        // 新增更新分頁函數
+        // 修改 updatePagination 函數
         function updatePagination() {
             const totalPages = Math.ceil(totalProducts / pageSize);
             const paginationDiv = document.getElementById('pagination');
             paginationDiv.innerHTML = '';
 
+            // 添加頁碼按鈕
             for (let i = 1; i <= totalPages; i++) {
                 if (
                     i === 1 ||
@@ -565,10 +593,13 @@
                 ) {
                     const ellipsis = document.createElement('span');
                     ellipsis.textContent = '...';
-                    ellipsis.style.margin = '0 2px';
+                    ellipsis.style.margin = '0 5px';
                     paginationDiv.appendChild(ellipsis);
                 }
             }
+
+            // 控制分頁的顯示
+            paginationDiv.style.display = totalPages > 1 ? 'flex' : 'none';
         }
 
         // 初始化時隱藏商品列表
@@ -1104,12 +1135,6 @@
                     element.style.display = isLoggedIn ? 'none' : 'block';
                 }
             });
-
-            // 特別處理分頁元素
-            const paginationElement = document.getElementById('pagination');
-            if (paginationElement) {
-                paginationElement.style.display = isLoggedIn && totalProducts > 0 ? 'flex' : 'none';
-            }
         }
 
         // 修改 setLoggedInState 函數
