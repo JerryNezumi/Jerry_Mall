@@ -1148,9 +1148,15 @@
             document.getElementById('loginSuccess').textContent = '登入成功';
             document.getElementById('loginError').textContent = '';
             updateUIVisibility(true);
-            updateMemberInfo();
+            // 不要在這裡調用 updateMemberInfo()，而是在點擊會員圖標時調用
             fetchProducts();
-            updateCartDisplay(); // 添加這行以更新購物車顯示
+            updateCartDisplay();
+            
+            // 確保會員資訊區域一開始是隱藏的
+            const memberInfoSection = document.getElementById('memberInfoSection');
+            if (memberInfoSection) {
+                memberInfoSection.style.display = 'none';
+            }
         }
 
         // 修改 logout 函數
