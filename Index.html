@@ -425,6 +425,8 @@
         const pageSize = 5;
         let currentUser = null;
         let totalProducts = 0;
+        let currentCategory = '';
+        let currentSearch = '';
 
         // 啟動按鈕
         document.getElementById('activateBtn').addEventListener('click', () => {
@@ -525,7 +527,9 @@
         }
 
         // 修改 fetchProducts 函數
-        function fetchProducts(category = '', search = '') {
+        function fetchProducts(category = currentCategory, search = currentSearch) {
+            currentCategory = category;
+            currentSearch = search;
             const url = new URL('https://springboot-mall-2.onrender.com/products');
             url.searchParams.append('limit', pageSize);
             url.searchParams.append('offset', (currentPage - 1) * pageSize);
@@ -573,7 +577,6 @@
             const paginationDiv = document.getElementById('pagination');
             paginationDiv.innerHTML = '';
 
-            // 添加頁碼按鈕
             for (let i = 1; i <= totalPages; i++) {
                 if (
                     i === 1 ||
@@ -584,7 +587,7 @@
                     pageButton.textContent = i;
                     pageButton.addEventListener('click', () => {
                         currentPage = i;
-                        fetchProducts();
+                        fetchProducts(); // 這裡不需要傳遞參數，因為我們使用了全局變量
                     });
                     if (i === currentPage) {
                         pageButton.disabled = true;
@@ -601,7 +604,6 @@
                 }
             }
 
-            // 控制分頁的顯示
             paginationDiv.style.display = totalPages > 1 ? 'flex' : 'none';
         }
 
