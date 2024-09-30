@@ -306,7 +306,7 @@
             <h2>購物車</h2>
             <div id="cartList"></div>
             <div id="cartTotal" style="font-weight: bold; margin-top: 10px;"></div>
-            <button onclick="placeOrder()">下單</button>
+            <button id="placeOrderBtn" onclick="placeOrder()">下單</button>
         </div>
 
         <!-- 查看訂單按鈕 (初始隱藏) -->
@@ -486,6 +486,16 @@
             return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
+        // 添加這個新函數來轉換類別名稱
+        function translateCategory(category) {
+            const categoryMap = {
+                'FOOD': '食品',
+                'CAR': '汽車',
+                'BOOK': '書籍'
+            };
+            return categoryMap[category] || category; // 如果沒有對應的翻譯，返回原始類別名
+        }
+
         // 修改 fetchProducts 函數
         function fetchProducts(category = '', search = '') {
             const url = new URL('https://springboot-mall-2.onrender.com/products');
@@ -506,7 +516,7 @@
                             <img src="${product.imageUrl}" alt="${product.productName}">
                             <div>
                                 <h3>${product.productName}</h3>
-                                <p>類別: ${product.category}</p>
+                                <p>類別: ${translateCategory(product.category)}</p>
                                 <p>價格: NT$${formatPrice(product.price)}</p>
                                 <p>庫存: ${product.stock}</p>
                                 <p>描述: ${product.description}</p>
@@ -910,6 +920,16 @@
 
         function updateCartDisplay() {
             const cartList = document.getElementById('cartList');
+            const cartTotal = document.getElementById('cartTotal');
+            const placeOrderBtn = document.getElementById('placeOrderBtn');
+
+            if (!currentUser) {
+                cartList.innerHTML = '<p>請先登入</p>';
+                cartTotal.textContent = '';
+                placeOrderBtn.style.display = 'none';
+                return;
+            }
+
             cartList.innerHTML = '';
             let totalAmount = 0;
             
@@ -930,7 +950,8 @@
             );
 
             Promise.all(promises).then(() => {
-                document.getElementById('cartTotal').textContent = `總金額: NT$${formatPrice(totalAmount)}`;
+                cartTotal.textContent = `總金額: NT$${formatPrice(totalAmount)}`;
+                placeOrderBtn.style.display = 'block';
             });
         }
 
@@ -984,7 +1005,11 @@
         // 添加購物車圖標的點擊事件
         document.getElementById('cartIcon').addEventListener('click', () => {
             const cartSection = document.getElementById('cartSection');
-            cartSection.style.display = cartSection.style.display === 'none' ? 'block' : 'none';
+            if (currentUser) {
+                cartSection.style.display = cartSection.style.display === 'none' ? 'block' : 'none';
+            } else {
+                alert('請先登入');
+            }
         });
 
         // 在頁面加載完成後初始化購物車圖標
@@ -1058,24 +1083,46 @@
             localStorage.removeItem('currentUser');
         }
 
-        // 設置用戶登錄狀態
+        // 添加這個新函數來控制元素可見性
+        function updateUIVisibility(isLoggedIn) {
+            const elementsToHideWhenLoggedOut = [
+                'viewOrdersBtn', 'merchantBtn', 'productList', 'searchForm', 'cartSection', 'pagination'
+            ];
+            const elementsToHideWhenLoggedIn = [
+                'loginForm', 'registerForm', 'activateBtn', 'activateMessage'
+            ];
+
+            elementsToHideWhenLoggedOut.forEach(id => {
+                document.getElementById(id).style.display = isLoggedIn ? 'block' : 'none';
+            });
+
+            elementsToHideWhenLoggedIn.forEach(id => {
+                document.getElementById(id).style.display = isLoggedIn ? 'none' : 'block';
+            });
+        }
+
+        // 修改 setLoggedInState 函數
         function setLoggedInState(user) {
             console.log('Setting logged in state with user:', user);
             console.log('User created date:', user.createdDate);
             currentUser = user;
             document.getElementById('loginSuccess').textContent = '登入成功';
             document.getElementById('loginError').textContent = '';
-            document.getElementById('viewOrdersBtn').style.display = 'block';
-            document.getElementById('merchantBtn').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('productList').style.display = 'block';
-            document.getElementById('activateBtn').style.display = 'none';
-            document.getElementById('searchForm').style.display = 'block';
-            document.getElementById('cartSection').style.display = 'block';
-            document.getElementById('activateMessage').style.display = 'none';
+            updateUIVisibility(true);
             updateMemberInfo();
             fetchProducts();
+            updateCartDisplay(); // 添加這行以更新購物車顯示
+        }
+
+        // 修改 logout 函數
+        function logout() {
+            clearUserFromLocalStorage();
+            currentUser = null;
+            updateUIVisibility(false);
+            cart = [];
+            updateCartItemCount();
+            updateMemberInfo();
+            updateCartDisplay(); // 添加這行以更新購物車顯示
         }
 
         // 在頁面加載時檢查登錄狀態
@@ -1083,6 +1130,8 @@
             const savedUser = getUserFromLocalStorage();
             if (savedUser) {
                 setLoggedInState(savedUser);
+            } else {
+                updateUIVisibility(false);
             }
             updateCartItemCount();
         });
