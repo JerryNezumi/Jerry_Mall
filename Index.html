@@ -1164,13 +1164,29 @@
             if (memberInfoSection) {
                 memberInfoSection.style.display = 'none';
             }
+
+            // 添加提示文字
+            const container = document.querySelector('.container');
+            const reminderText = document.createElement('p');
+            reminderText.textContent = "若停留網頁過久導致商品列表消失，請登出後重新登入，謝謝";
+            reminderText.style.color = "#a3896f";
+            reminderText.style.fontWeight = "bold";
+            reminderText.style.textAlign = "center";
+            reminderText.style.margin = "10px 0";
+            container.insertBefore(reminderText, container.firstChild);
         }
 
-        // 修改 logout 函數
+        // 修改 logout 函數，確保在登出時移除提示文字
         function logout() {
             clearUserFromLocalStorage();
             currentUser = null;
             cart = [];
+            
+            // 移除提示文字
+            const reminderText = document.querySelector('.container > p:first-child');
+            if (reminderText && reminderText.textContent.includes("若停留網頁過久")) {
+                reminderText.remove();
+            }
             
             // 重新載入頁面
             window.location.reload();
