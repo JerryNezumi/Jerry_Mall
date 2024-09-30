@@ -469,6 +469,7 @@
             })
             .then(data => {
                 currentUser = data;
+                console.log('Current user:', currentUser);  // 添加這行來檢查接收到的用戶數據
                 document.getElementById('loginSuccess').textContent = '登入成功';
                 document.getElementById('loginError').textContent = '';
                 document.getElementById('viewOrdersBtn').style.display = 'block';
@@ -1021,9 +1022,14 @@
             const memberInfo = document.getElementById('memberInfo');
             let createdDateString = '未知';
             if (currentUser.createdDate) {
+                // 假設後端返回的是一個毫秒級的時間戳
                 const createdDate = new Date(currentUser.createdDate);
                 if (!isNaN(createdDate.getTime())) {
-                    createdDateString = createdDate.toLocaleString();
+                    createdDateString = createdDate.toLocaleDateString('zh-TW', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
                 }
             }
             memberInfo.innerHTML = `
