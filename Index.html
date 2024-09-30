@@ -1135,6 +1135,12 @@
                     element.style.display = isLoggedIn ? 'none' : 'block';
                 }
             });
+
+            // 特別處理分頁元素
+            const paginationElement = document.getElementById('pagination');
+            if (paginationElement) {
+                paginationElement.style.display = isLoggedIn && totalProducts > 0 ? 'flex' : 'none';
+            }
         }
 
         // 修改 setLoggedInState 函數
