@@ -388,7 +388,7 @@
     <div id="memberInfoSection" style="display: none; position: fixed; top: 70px; right: 70px; background-color: white; border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 300px; z-index: 1000;">
         <h2>會員資訊</h2>
         <div id="memberInfo"></div>
-        <button id="logoutBtn" style="margin-top: 10px; width: 100%;">登出</button>
+        <button id="logoutBtn" style="margin-top: 10px; width: 100%; display: none;">登出</button>
     </div>
 
     <script>
@@ -1008,23 +1008,32 @@
         // 更新會員信息
         function updateMemberInfo() {
             const memberInfo = document.getElementById('memberInfo');
-            let createdDateString = '未知';
-            if (currentUser.createdDate) {
-                // 假設後端返回的是一個毫秒級的時間戳
-                const createdDate = new Date(currentUser.createdDate);
-                if (!isNaN(createdDate.getTime())) {
-                    createdDateString = createdDate.toLocaleDateString('zh-TW', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                    });
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (currentUser) {
+                console.log('Current user:', currentUser); // 添加這行
+                console.log('Created date:', currentUser.createdDate); // 添加這行
+                let createdDateString = '未知';
+                if (currentUser.createdDate) {
+                    const createdDate = new Date(currentUser.createdDate);
+                    console.log('Parsed date:', createdDate); // 添加這行
+                    if (!isNaN(createdDate.getTime())) {
+                        createdDateString = createdDate.toLocaleDateString('zh-TW', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
+                    }
                 }
+                memberInfo.innerHTML = `
+                    <p>電子郵件: ${currentUser.email}</p>
+                    <p>用戶ID: ${currentUser.userId}</p>
+                    <p>創建時間: ${createdDateString}</p>
+                `;
+                logoutBtn.style.display = 'block';
+            } else {
+                memberInfo.innerHTML = '<p>請先登入</p>';
+                logoutBtn.style.display = 'none';
             }
-            memberInfo.innerHTML = `
-                <p>電子郵件: ${currentUser.email}</p>
-                <p>用戶ID: ${currentUser.userId}</p>
-                <p>創建時間: ${createdDateString}</p>
-            `;
         }
 
         // 在 <script> 標籤內添加以下函數
@@ -1088,6 +1097,7 @@
             document.getElementById('activateMessage').style.display = 'block';
             cart = [];
             updateCartItemCount();
+            updateMemberInfo();
         }
 
         // 添加登出按鈕的事件監聽器
