@@ -1159,8 +1159,41 @@
             currentUser = null;
             cart = [];
             
-            // 重新載入頁面
-            window.location.reload();
+            // 重置所有相關的狀態
+            currentPage = 1;
+            totalProducts = 0;
+
+            // 清空並隱藏商品列表
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            productList.style.display = 'none';
+
+            // 清空並隱藏分頁
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            pagination.style.display = 'none';
+
+            // 隱藏其他登錄後才顯示的元素
+            ['viewOrdersBtn', 'merchantBtn', 'searchForm', 'cartSection'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = 'none';
+            });
+
+            // 顯示登錄和註冊表單
+            ['loginForm', 'registerForm', 'activateBtn', 'activateMessage'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = 'block';
+            });
+
+            // 清空購物車顯示
+            updateCartDisplay();
+            updateCartItemCount();
+
+            // 更新會員信息顯示
+            updateMemberInfo();
+
+            // 如果需要，可以考慮重新加載頁面
+            // window.location.reload();
         }
 
         // 在頁面加載時檢查登錄狀態
@@ -1170,28 +1203,12 @@
                 setLoggedInState(savedUser);
             } else {
                 updateUIVisibility(false);
+                // 確保分頁被隱藏
+                const pagination = document.getElementById('pagination');
+                if (pagination) pagination.style.display = 'none';
             }
             updateCartItemCount();
         });
-
-        // 添加登出功能
-        function logout() {
-            clearUserFromLocalStorage();
-            currentUser = null;
-            // 重置UI到未登錄狀態
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('viewOrdersBtn').style.display = 'none';
-            document.getElementById('merchantBtn').style.display = 'none';
-            document.getElementById('productList').style.display = 'none';
-            document.getElementById('searchForm').style.display = 'none';
-            document.getElementById('cartSection').style.display = 'none';
-            document.getElementById('activateBtn').style.display = 'block';
-            document.getElementById('activateMessage').style.display = 'block';
-            cart = [];
-            updateCartItemCount();
-            updateMemberInfo();
-        }
 
         // 添加登出按鈕的事件監聽器
         document.getElementById('logoutBtn').addEventListener('click', logout);
