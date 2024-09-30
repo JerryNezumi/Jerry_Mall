@@ -1019,10 +1019,17 @@
         // 更新會員信息
         function updateMemberInfo() {
             const memberInfo = document.getElementById('memberInfo');
+            let createdDateString = '未知';
+            if (currentUser.createdDate) {
+                const createdDate = new Date(currentUser.createdDate);
+                if (!isNaN(createdDate.getTime())) {
+                    createdDateString = createdDate.toLocaleString();
+                }
+            }
             memberInfo.innerHTML = `
                 <p>電子郵件: ${currentUser.email}</p>
                 <p>用戶ID: ${currentUser.userId}</p>
-                <p>創建時間: ${new Date(currentUser.createdDate).toLocaleString()}</p>
+                <p>創建時間: ${createdDateString}</p>
             `;
         }
     </script>
