@@ -258,6 +258,11 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            width: 30px; /* 固定寬度 */
+            height: 30px; /* 固定高度 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .pagination button:disabled {
@@ -1132,7 +1137,7 @@
             // 特別處理分頁元素
             const paginationElement = document.getElementById('pagination');
             if (paginationElement) {
-                paginationElement.style.display = isLoggedIn && totalProducts > 0 ? 'flex' : 'none';
+                paginationElement.style.display = isLoggedIn && totalProducts > pageSize ? 'flex' : 'none';
             }
         }
 
@@ -1172,6 +1177,22 @@
             // 重置當前頁面和總商品數
             currentPage = 1;
             totalProducts = 0;
+
+            // 確保所有相關元素被正確隱藏
+            ['viewOrdersBtn', 'merchantBtn', 'productList', 'searchForm', 'cartSection', 'pagination'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+
+            // 顯示登入和註冊表單
+            ['loginForm', 'registerForm', 'activateBtn', 'activateMessage'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = 'block';
+                }
+            });
         }
 
         // 在頁面加載時檢查登錄狀態
