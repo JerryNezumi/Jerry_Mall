@@ -382,7 +382,7 @@
 
     <!-- 在 <body> 標籤內，添加會員資訊圖標和彈出框 -->
     <div id="memberIcon" style="position: fixed; top: 10px; right: 70px; cursor: pointer;">
-        <img src="https://img95.699pic.com/element/40206/2582.png_300.png" alt="會員資訊" style="width: 50px; height: 50px;">
+        <img src="https://img.88icon.com/download/jpg/20200901/3e9ce3813b7199ea9588eeb920f41208_512_512.jpg!bg" alt="會員資訊" style="width: 50px; height: 50px;">
     </div>
 
     <div id="memberInfoSection" style="display: none; position: fixed; top: 70px; right: 70px; background-color: white; border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 300px; z-index: 1000;">
@@ -490,7 +490,12 @@
             });
         });
 
-        // 修改取得商品列表函數
+        // 添加價格格式化函數
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // 修改 fetchProducts 函數
         function fetchProducts(category = '', search = '') {
             const url = new URL('https://springboot-mall-2.onrender.com/products');
             url.searchParams.append('limit', pageSize);
@@ -511,7 +516,7 @@
                             <div>
                                 <h3>${product.productName}</h3>
                                 <p>類別: ${product.category}</p>
-                                <p>價格: $${product.price}</p>
+                                <p>價格: $${formatPrice(product.price)}</p>
                                 <p>庫存: ${product.stock}</p>
                                 <p>描述: ${product.description}</p>
                                 ${currentUser ? `
@@ -634,7 +639,7 @@
                             orderDiv.className = 'order';
                             orderDiv.innerHTML = `
                                 <p>訂單ID: ${order.orderId}</p>
-                                <p>訂單總金額: $${order.totalAmount}</p>
+                                <p>訂單總金額: $${formatPrice(order.totalAmount)}</p>
                                 <p>下單時間: ${new Date(order.createdDate).toLocaleString()}</p>
                                 <button onclick="toggleOrderDetails(${order.orderId})">顯示訂單明細</button>
                                 <div id="orderDetails-${order.orderId}" class="order-details" style="display: none;">
@@ -644,7 +649,7 @@
                                             <img src="${item.imageUrl}" alt="${item.productName}" style="width: 50px; height: 50px; object-fit: cover;">
                                             <p>商品名稱: ${item.productName}</p>
                                             <p>數量: ${item.quantity}</p>
-                                            <p>小計: $${item.amount}</p>
+                                            <p>小計: $${formatPrice(item.amount)}</p>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -924,7 +929,7 @@
                         const cartItem = document.createElement('div');
                         cartItem.innerHTML = `
                             <img src="${product.imageUrl}" alt="${product.productName}" style="width: 50px; height: 50px; object-fit: cover;">
-                            <p>商品名稱: ${product.productName}, 數量: ${item.quantity}, 單價: $${product.price}</p>
+                            <p>商品名稱: ${product.productName}, 數量: ${item.quantity}, 單價: $${formatPrice(product.price)}</p>
                             <button onclick="removeFromCart(${item.productId})">移除</button>
                         `;
                         cartList.appendChild(cartItem);
@@ -934,7 +939,7 @@
             );
 
             Promise.all(promises).then(() => {
-                document.getElementById('cartTotal').textContent = `總金額: $${totalAmount}`;
+                document.getElementById('cartTotal').textContent = `總金額: $${formatPrice(totalAmount)}`;
             });
         }
 
