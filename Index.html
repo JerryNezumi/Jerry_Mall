@@ -388,6 +388,7 @@
     <div id="memberInfoSection" style="display: none; position: fixed; top: 70px; right: 70px; background-color: white; border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 300px; z-index: 1000;">
         <h2>會員資訊</h2>
         <div id="memberInfo"></div>
+        <button id="logoutBtn" style="margin-top: 10px; width: 100%;">登出</button>
     </div>
 
     <script>
@@ -1089,8 +1090,8 @@
             updateCartItemCount();
         }
 
-        // 在適當的位置添加登出按鈕，例如在會員資訊區域
-        document.getElementById('memberInfo').innerHTML += '<button onclick="logout()">登出</button>';
+        // 添加登出按鈕的事件監聽器
+        document.getElementById('logoutBtn').addEventListener('click', logout);
     </script>
 </body>
 </html>
