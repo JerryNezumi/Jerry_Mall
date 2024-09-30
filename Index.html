@@ -273,6 +273,11 @@
         .pagination button:hover:not(:disabled) {
             background-color: #b99d7f;
         }
+
+        /* 修改 CSS 使標題可點擊 */
+        header h1 {
+            cursor: pointer;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 </head>
@@ -1165,41 +1170,8 @@
             currentUser = null;
             cart = [];
             
-            // 重置所有相關的狀態
-            currentPage = 1;
-            totalProducts = 0;
-
-            // 清空並隱藏商品列表
-            const productList = document.getElementById('productList');
-            productList.innerHTML = '';
-            productList.style.display = 'none';
-
-            // 清空並隱藏分頁
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-            pagination.style.display = 'none';
-
-            // 隱藏其他登錄後才顯示的元素
-            ['viewOrdersBtn', 'merchantBtn', 'searchForm', 'cartSection'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.style.display = 'none';
-            });
-
-            // 顯示登錄和註冊表單
-            ['loginForm', 'registerForm', 'activateBtn', 'activateMessage'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.style.display = 'block';
-            });
-
-            // 清空購物車顯示
-            updateCartDisplay();
-            updateCartItemCount();
-
-            // 更新會員信息顯示
-            updateMemberInfo();
-
-            // 如果需要，可以考慮重新加載頁面
-            // window.location.reload();
+            // 重新載入頁面
+            window.location.reload();
         }
 
         // 在頁面加載時檢查登錄狀態
@@ -1218,6 +1190,14 @@
 
         // 添加登出按鈕的事件監聽器
         document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // 為 Jerry-mall 標題添加點擊事件
+        document.querySelector('header h1').addEventListener('click', function() {
+            // 重置當前頁碼為 1
+            currentPage = 1;
+            // 重新載入頁面
+            window.location.reload();
+        });
     </script>
 </body>
 </html>
