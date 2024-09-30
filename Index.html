@@ -380,6 +380,16 @@
         </div>
     </div>
 
+    <!-- 在 <body> 標籤內，添加會員信息圖標和彈出框 -->
+    <div id="memberIcon" style="position: fixed; top: 10px; right: 70px; cursor: pointer;">
+        <img src="https://img95.699pic.com/element/40206/2582.png_300.png" alt="會員信息" style="width: 50px; height: 50px;">
+    </div>
+
+    <div id="memberInfoSection" style="display: none; position: fixed; top: 70px; right: 70px; background-color: white; border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); max-width: 300px; z-index: 1000;">
+        <h2>會員信息</h2>
+        <div id="memberInfo"></div>
+    </div>
+
     <script>
         let currentPage = 1;
         const pageSize = 5;
@@ -471,6 +481,7 @@
                 document.getElementById('cartSection').style.display = 'block';
                 document.getElementById('activateMessage').style.display = 'none';
                 fetchProducts();
+                updateMemberInfo(); // 更新會員信息
             })
             .catch(error => {
                 console.error('Login error:', error);
@@ -984,6 +995,31 @@
         window.addEventListener('load', () => {
             updateCartItemCount();
         });
+
+        // 添加會員圖標的點擊事件
+        document.getElementById('memberIcon').addEventListener('click', () => {
+            const memberInfoSection = document.getElementById('memberInfoSection');
+            if (memberInfoSection.style.display === 'none') {
+                if (currentUser) {
+                    updateMemberInfo();
+                } else {
+                    document.getElementById('memberInfo').innerHTML = '<p>請先登入</p>';
+                }
+                memberInfoSection.style.display = 'block';
+            } else {
+                memberInfoSection.style.display = 'none';
+            }
+        });
+
+        // 更新會員信息
+        function updateMemberInfo() {
+            const memberInfo = document.getElementById('memberInfo');
+            memberInfo.innerHTML = `
+                <p>電子郵件: ${currentUser.email}</p>
+                <p>用戶ID: ${currentUser.userId}</p>
+                <p>創建時間: ${new Date(currentUser.createdDate).toLocaleString()}</p>
+            `;
+        }
     </script>
 </body>
 </html>
