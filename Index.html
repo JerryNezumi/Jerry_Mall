@@ -1016,10 +1016,16 @@
                 console.log('Created date:', currentUser.createdDate); // 添加這行
                 let createdDateString = '未知';
                 if (currentUser.createdDate) {
-                    // 使用 moment.js 解析日期
-                    const createdDate = moment(currentUser.createdDate, "YYYY-MM-DD HH:mm:ss");
+                    // 使用 moment.js 解析日期，嘗試多種格式
+                    const createdDate = moment(currentUser.createdDate, [
+                        moment.ISO_8601,
+                        "YYYY-MM-DD HH:mm:ss",
+                        "YYYY-MM-DDTHH:mm:ss.SSSZ"
+                    ]);
                     if (createdDate.isValid()) {
                         createdDateString = createdDate.format('YYYY-MM-DD HH:mm:ss');
+                    } else {
+                        console.error('無法解析日期:', currentUser.createdDate);
                     }
                 }
                 memberInfo.innerHTML = `
@@ -1054,7 +1060,8 @@
 
         // 設置用戶登錄狀態
         function setLoggedInState(user) {
-            console.log('Setting logged in state with user:', user); // 添加這行
+            console.log('Setting logged in state with user:', user);
+            console.log('User created date:', user.createdDate);
             currentUser = user;
             document.getElementById('loginSuccess').textContent = '登入成功';
             document.getElementById('loginError').textContent = '';
