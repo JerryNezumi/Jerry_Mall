@@ -251,6 +251,7 @@
             height: auto;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 </head>
 <body>
     <header>
@@ -1015,28 +1016,10 @@
                 console.log('Created date:', currentUser.createdDate); // 添加這行
                 let createdDateString = '未知';
                 if (currentUser.createdDate) {
-                    // 嘗試直接解析日期
-                    const createdDate = new Date(currentUser.createdDate);
-                    console.log('Parsed date:', createdDate); // 添加這行
-                    if (!isNaN(createdDate.getTime())) {
-                        createdDateString = createdDate.toLocaleDateString('zh-TW', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit'
-                        });
-                    } else {
-                        // 如果直接解析失敗，嘗試手動解析
-                        const parts = currentUser.createdDate.split(/[- :]/);
-                        if (parts.length >= 3) {
-                            const manualDate = new Date(parts[0], parts[1] - 1, parts[2]);
-                            if (!isNaN(manualDate.getTime())) {
-                                createdDateString = manualDate.toLocaleDateString('zh-TW', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit'
-                                });
-                            }
-                        }
+                    // 使用 moment.js 解析日期
+                    const createdDate = moment(currentUser.createdDate, "YYYY-MM-DD HH:mm:ss");
+                    if (createdDate.isValid()) {
+                        createdDateString = createdDate.format('YYYY-MM-DD HH:mm:ss');
                     }
                 }
                 memberInfo.innerHTML = `
