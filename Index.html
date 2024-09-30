@@ -66,7 +66,11 @@
         .pagination, #merchantPagination {
             display: flex;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 20px;
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
         }
         .pagination button, #merchantPagination button {
             margin: 0 2px;
@@ -535,6 +539,7 @@
 
                     totalProducts = data.total;
                     updatePagination();
+                    updateUIVisibility(true); // 添加這行來更新 UI 可見性
                 });
         }
 
@@ -1019,16 +1024,16 @@
 
         // 添加會員圖標的點擊事件
         document.getElementById('memberIcon').addEventListener('click', () => {
-            const memberInfoSection = document.getElementById('memberInfoSection');
-            if (memberInfoSection.style.display === 'none') {
-                if (currentUser) {
+            if (currentUser) {
+                const memberInfoSection = document.getElementById('memberInfoSection');
+                if (memberInfoSection.style.display === 'none') {
                     updateMemberInfo();
+                    memberInfoSection.style.display = 'block';
                 } else {
-                    document.getElementById('memberInfo').innerHTML = '<p>請先登入</p>';
+                    memberInfoSection.style.display = 'none';
                 }
-                memberInfoSection.style.display = 'block';
             } else {
-                memberInfoSection.style.display = 'none';
+                alert('請先登入');
             }
         });
 
@@ -1093,12 +1098,24 @@
             ];
 
             elementsToHideWhenLoggedOut.forEach(id => {
-                document.getElementById(id).style.display = isLoggedIn ? 'block' : 'none';
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = isLoggedIn ? 'block' : 'none';
+                }
             });
 
             elementsToHideWhenLoggedIn.forEach(id => {
-                document.getElementById(id).style.display = isLoggedIn ? 'none' : 'block';
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = isLoggedIn ? 'none' : 'block';
+                }
             });
+
+            // 特別處理分頁元素
+            const paginationElement = document.getElementById('pagination');
+            if (paginationElement) {
+                paginationElement.style.display = isLoggedIn && totalProducts > 0 ? 'flex' : 'none';
+            }
         }
 
         // 修改 setLoggedInState 函數
@@ -1122,7 +1139,15 @@
             cart = [];
             updateCartItemCount();
             updateMemberInfo();
-            updateCartDisplay(); // 添加這行以更新購物車顯示
+            updateCartDisplay();
+            
+            // 清空商品列表和分頁
+            document.getElementById('productList').innerHTML = '';
+            document.getElementById('pagination').innerHTML = '';
+            
+            // 重置當前頁面和總商品數
+            currentPage = 1;
+            totalProducts = 0;
         }
 
         // 在頁面加載時檢查登錄狀態
