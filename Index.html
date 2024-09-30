@@ -1158,42 +1158,8 @@
         function logout() {
             clearUserFromLocalStorage();
             currentUser = null;
-            updateUIVisibility(false);
             cart = [];
-            updateCartItemCount();
-            updateMemberInfo();
-            updateCartDisplay();
             
-            // 清空商品列表和分頁
-            document.getElementById('productList').innerHTML = '';
-            document.getElementById('pagination').innerHTML = '';
-            
-            // 隱藏分頁
-            const paginationElement = document.getElementById('pagination');
-            if (paginationElement) {
-                paginationElement.style.display = 'none';
-            }
-            
-            // 重置當前頁面和總商品數
-            currentPage = 1;
-            totalProducts = 0;
-
-            // 確保所有相關元素被正確隱藏
-            ['viewOrdersBtn', 'merchantBtn', 'productList', 'searchForm', 'cartSection', 'pagination'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.style.display = 'none';
-                }
-            });
-
-            // 顯示登入和註冊表單
-            ['loginForm', 'registerForm', 'activateBtn', 'activateMessage'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.style.display = 'block';
-                }
-            });
-
             // 重新載入頁面
             window.location.reload();
         }
