@@ -223,24 +223,18 @@
 
         /* 調整分頁按鈕樣式 */
         .pagination button, #merchantPagination button {
-            margin: 0 1px;
-            padding: 2px 4px;
-            font-size: 8px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 2px;
+            margin: 0 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #a3896f;
+            color: white;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
-            min-width: 16px;
-            height: 16px;
-            line-height: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .pagination button:disabled, #merchantPagination button:disabled {
-            background-color: #a3896f;
-            color: white;
+            background-color: #8a7259;
             cursor: default;
         }
 
@@ -1144,6 +1138,12 @@
             // 清空商品列表和分頁
             document.getElementById('productList').innerHTML = '';
             document.getElementById('pagination').innerHTML = '';
+            
+            // 隱藏分頁
+            const paginationElement = document.getElementById('pagination');
+            if (paginationElement) {
+                paginationElement.style.display = 'none';
+            }
             
             // 重置當前頁面和總商品數
             currentPage = 1;
