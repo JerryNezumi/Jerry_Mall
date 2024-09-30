@@ -469,7 +469,8 @@
                 return response.json();
             })
             .then(data => {
-                saveUserToLocalStorage(data); // 保存用戶信息到 localStorage
+                console.log('Login response:', data); // 添加這行
+                saveUserToLocalStorage(data);
                 setLoggedInState(data);
             })
             .catch(error => {
@@ -1014,6 +1015,7 @@
                 console.log('Created date:', currentUser.createdDate); // 添加這行
                 let createdDateString = '未知';
                 if (currentUser.createdDate) {
+                    // 嘗試直接解析日期
                     const createdDate = new Date(currentUser.createdDate);
                     console.log('Parsed date:', createdDate); // 添加這行
                     if (!isNaN(createdDate.getTime())) {
@@ -1022,6 +1024,19 @@
                             month: '2-digit',
                             day: '2-digit'
                         });
+                    } else {
+                        // 如果直接解析失敗，嘗試手動解析
+                        const parts = currentUser.createdDate.split(/[- :]/);
+                        if (parts.length >= 3) {
+                            const manualDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                            if (!isNaN(manualDate.getTime())) {
+                                createdDateString = manualDate.toLocaleDateString('zh-TW', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit'
+                                });
+                            }
+                        }
                     }
                 }
                 memberInfo.innerHTML = `
@@ -1056,6 +1071,7 @@
 
         // 設置用戶登錄狀態
         function setLoggedInState(user) {
+            console.log('Setting logged in state with user:', user); // 添加這行
             currentUser = user;
             document.getElementById('loginSuccess').textContent = '登入成功';
             document.getElementById('loginError').textContent = '';
